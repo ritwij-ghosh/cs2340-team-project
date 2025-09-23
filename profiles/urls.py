@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from django.urls import path
 from . import views
 
@@ -11,3 +12,12 @@ urlpatterns = [
     path('edit-user-info/', views.edit_user_info, name='edit_user_info'),
     path('view/<int:user_id>/', views.view_profile, name='view'),
 ]
+=======
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('', views.index, name='profiles.index'),
+    path('about', views.about, name='profiles.about'),
+] 
+>>>>>>> c0c2653 (WIP)

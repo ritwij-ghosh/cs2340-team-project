@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from django.contrib import messages
@@ -30,3 +31,16 @@ def logout_view(request):
     logout(request)
     messages.success(request, 'Successfully logged out!')
     return redirect('home:index')
+=======
+from django.shortcuts import render
+
+# Create your views here.
+
+
+def index(request):
+    return render(request, 'accounts/index.html')
+
+
+def about(request):
+    return render(request, 'accounts/about.html')
+>>>>>>> c0c2653 (WIP)

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import URLValidator
@@ -73,3 +74,8 @@ class Profile(models.Model):
     def has_links(self):
         """Check if profile has any social/professional links."""
         return any([self.linkedin_url, self.github_url, self.portfolio_url, self.other_url])
+=======
+from django.db import models
+
+# Create your models here.
+>>>>>>> c0c2653 (WIP)

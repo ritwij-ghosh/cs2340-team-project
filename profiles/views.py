@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -115,3 +116,16 @@ def view_profile(request, user_id):
         'template_data': {'title': f'{user.get_full_name() or user.username} - Profile - HireBuzz'}
     }
     return render(request, 'profiles/view_profile.html', context)
+=======
+from django.shortcuts import render
+
+# Create your views here.
+
+
+def index(request):
+    return render(request, 'profiles/index.html')
+
+
+def about(request):
+    return render(request, 'profiles/about.html')
+>>>>>>> c0c2653 (WIP)
