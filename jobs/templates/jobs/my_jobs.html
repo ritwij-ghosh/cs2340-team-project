@@ -40,7 +40,21 @@
                 <i class="fas fa-clock me-1"></i>{{ job.get_employment_type_display }}
                 <span class="mx-2">•</span>
                 <i class="fas fa-user-graduate me-1"></i>{{ job.get_experience_level_display }}
+                <span class="mx-2">•</span>
+                <i class="fas fa-laptop me-1"></i>{{ job.get_work_type_display }}
               </small>
+            </div>
+            <div class="mb-2">
+              {% if job.visa_sponsorship %}
+                <span class="badge bg-info me-1">
+                  <i class="fas fa-passport me-1"></i>Visa Sponsorship
+                </span>
+              {% endif %}
+              {% if job.is_remote_friendly %}
+                <span class="badge bg-success me-1">
+                  <i class="fas fa-home me-1"></i>Remote Friendly
+                </span>
+              {% endif %}
             </div>
 
             <p class="card-text text-muted mb-3">

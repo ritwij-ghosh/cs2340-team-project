@@ -27,6 +27,12 @@ class Job(models.Model):
         ('closed', 'Closed'),
     ]
 
+    WORK_TYPE_CHOICES = [
+        ('on_site', 'On-site'),
+        ('remote', 'Remote'),
+        ('hybrid', 'Hybrid'),
+    ]
+
     # Job basic information
     title = models.CharField(
         max_length=200,
@@ -49,6 +55,24 @@ class Job(models.Model):
         max_length=20,
         choices=EXPERIENCE_LEVEL_CHOICES,
         default='mid'
+    )
+    work_type = models.CharField(
+        max_length=20,
+        choices=WORK_TYPE_CHOICES,
+        default='on_site',
+        help_text="Work arrangement (on-site, remote, or hybrid)"
+    )
+
+    # Skills and requirements
+    skills_required = models.TextField(
+        blank=True,
+        help_text="Comma-separated list of required skills (e.g., Python, Django, React)"
+    )
+
+    # Visa and sponsorship
+    visa_sponsorship = models.BooleanField(
+        default=False,
+        help_text="Does this position offer visa sponsorship?"
     )
 
     # Job details
@@ -132,3 +156,13 @@ class Job(models.Model):
         elif self.salary_max:
             return f"Up to ${self.salary_max:,.0f}"
         return "Salary not specified"
+
+    def get_skills_list(self):
+        """Return skills as a list for easier template rendering."""
+        if self.skills_required:
+            return [skill.strip() for skill in self.skills_required.split(',') if skill.strip()]
+        return []
+
+    def is_remote_friendly(self):
+        """Check if job allows remote work."""
+        return self.work_type in ['remote', 'hybrid']

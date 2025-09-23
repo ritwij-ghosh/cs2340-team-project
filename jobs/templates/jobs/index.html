@@ -20,28 +20,109 @@
 
   <!-- Search and Filter Section -->
   <div class="card mb-4">
+    <div class="card-header">
+      <h5 class="mb-0">
+        <i class="fas fa-filter me-2"></i>Search & Filter Jobs
+      </h5>
+    </div>
     <div class="card-body">
-      <form method="get" class="row g-3">
-        <div class="col-md-4">
-          {{ search_form.search }}
+      <form method="get" id="jobSearchForm">
+        <!-- Primary Search Row -->
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label for="{{ search_form.search.id_for_label }}" class="form-label">Keywords</label>
+            {{ search_form.search }}
+          </div>
+          <div class="col-md-4">
+            <label for="{{ search_form.location.id_for_label }}" class="form-label">Location</label>
+            {{ search_form.location }}
+          </div>
+          <div class="col-md-2">
+            <label class="form-label d-block">&nbsp;</label>
+            <button type="submit" class="btn btn-primary w-100">
+              <i class="fas fa-search me-1"></i>Search
+            </button>
+          </div>
         </div>
-        <div class="col-md-3">
-          {{ search_form.location }}
+
+        <!-- Skills Row -->
+        <div class="row g-3 mb-3">
+          <div class="col-12">
+            <label for="{{ search_form.skills.id_for_label }}" class="form-label">Skills</label>
+            {{ search_form.skills }}
+            <small class="form-text text-muted">Separate multiple skills with commas</small>
+          </div>
         </div>
-        <div class="col-md-2">
-          {{ search_form.employment_type }}
+
+        <!-- Filter Options Row -->
+        <div class="row g-3 mb-3">
+          <div class="col-md-3">
+            <label for="{{ search_form.employment_type.id_for_label }}" class="form-label">Employment Type</label>
+            {{ search_form.employment_type }}
+          </div>
+          <div class="col-md-3">
+            <label for="{{ search_form.work_type.id_for_label }}" class="form-label">Work Type</label>
+            {{ search_form.work_type }}
+          </div>
+          <div class="col-md-3">
+            <label for="{{ search_form.experience_level.id_for_label }}" class="form-label">Experience Level</label>
+            {{ search_form.experience_level }}
+          </div>
+          <div class="col-md-3">
+            <div class="d-flex align-items-end h-100">
+              <button type="button" class="btn btn-outline-secondary w-100" onclick="clearFilters()">
+                <i class="fas fa-times me-1"></i>Clear Filters
+              </button>
+            </div>
+          </div>
         </div>
-        <div class="col-md-2">
-          {{ search_form.experience_level }}
-        </div>
-        <div class="col-md-1">
-          <button type="submit" class="btn btn-primary w-100">
-            <i class="fas fa-search"></i>
-          </button>
+
+        <!-- Salary Range Row -->
+        <div class="row g-3 mb-3">
+          <div class="col-md-3">
+            <label for="{{ search_form.salary_min.id_for_label }}" class="form-label">Min Salary ($)</label>
+            {{ search_form.salary_min }}
+          </div>
+          <div class="col-md-3">
+            <label for="{{ search_form.salary_max.id_for_label }}" class="form-label">Max Salary ($)</label>
+            {{ search_form.salary_max }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Additional Filters</label>
+            <div class="d-flex gap-4">
+              <div class="form-check">
+                {{ search_form.visa_sponsorship }}
+                <label class="form-check-label" for="{{ search_form.visa_sponsorship.id_for_label }}">
+                  Visa Sponsorship
+                </label>
+              </div>
+              <div class="form-check">
+                {{ search_form.remote_only }}
+                <label class="form-check-label" for="{{ search_form.remote_only.id_for_label }}">
+                  Remote Friendly
+                </label>
+              </div>
+            </div>
+          </div>
         </div>
       </form>
     </div>
   </div>
+
+  <script>
+    function clearFilters() {
+      const form = document.getElementById('jobSearchForm');
+      const inputs = form.querySelectorAll('input, select');
+      inputs.forEach(input => {
+        if (input.type === 'checkbox') {
+          input.checked = false;
+        } else {
+          input.value = '';
+        }
+      });
+      form.submit();
+    }
+  </script>
 
   <!-- Job Listings -->
   <div class="row">
@@ -65,7 +146,28 @@
                 <i class="fas fa-clock me-1"></i>{{ job.get_employment_type_display }}
                 <span class="mx-2">•</span>
                 <i class="fas fa-user-graduate me-1"></i>{{ job.get_experience_level_display }}
+                <span class="mx-2">•</span>
+                <i class="fas fa-laptop me-1"></i>{{ job.get_work_type_display }}
               </small>
+            </div>
+            {% if job.get_skills_list %}
+              <div class="mb-2">
+                {% for skill in job.get_skills_list %}
+                  <span class="badge bg-light text-dark me-1">{{ skill }}</span>
+                {% endfor %}
+              </div>
+            {% endif %}
+            <div class="mb-2">
+              {% if job.visa_sponsorship %}
+                <span class="badge bg-info me-1">
+                  <i class="fas fa-passport me-1"></i>Visa Sponsorship
+                </span>
+              {% endif %}
+              {% if job.is_remote_friendly %}
+                <span class="badge bg-success me-1">
+                  <i class="fas fa-home me-1"></i>Remote Friendly
+                </span>
+              {% endif %}
             </div>
             <p class="card-text text-muted">
               {{ job.description|truncatewords:30 }}

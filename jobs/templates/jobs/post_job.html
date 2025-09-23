@@ -54,6 +54,24 @@
                 {% endif %}
               </div>
               <div class="col-md-6 mb-3">
+                <label for="{{ form.work_type.id_for_label }}" class="form-label">Work Type</label>
+                {{ form.work_type }}
+                {% if form.work_type.errors %}
+                  <div class="text-danger small">{{ form.work_type.errors }}</div>
+                {% endif %}
+              </div>
+              <div class="col-md-6 mb-3">
+                <div class="form-check">
+                  {{ form.visa_sponsorship }}
+                  <label class="form-check-label" for="{{ form.visa_sponsorship.id_for_label }}">
+                    Offers Visa Sponsorship
+                  </label>
+                </div>
+                {% if form.visa_sponsorship.errors %}
+                  <div class="text-danger small">{{ form.visa_sponsorship.errors }}</div>
+                {% endif %}
+              </div>
+              <div class="col-md-6 mb-3">
                 <label for="{{ form.status.id_for_label }}" class="form-label">Status</label>
                 {{ form.status }}
                 {% if form.status.errors %}
@@ -66,6 +84,14 @@
             <div class="row mb-4">
               <div class="col-12">
                 <h5 class="border-bottom pb-2 mb-3">Job Details</h5>
+              </div>
+              <div class="col-12 mb-3">
+                <label for="{{ form.skills_required.id_for_label }}" class="form-label">Required Skills</label>
+                {{ form.skills_required }}
+                <small class="form-text text-muted">List key skills separated by commas (e.g., Python, Django, React, PostgreSQL)</small>
+                {% if form.skills_required.errors %}
+                  <div class="text-danger small">{{ form.skills_required.errors }}</div>
+                {% endif %}
               </div>
               <div class="col-12 mb-3">
                 <label for="{{ form.description.id_for_label }}" class="form-label">Job Description *</label>

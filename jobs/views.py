@@ -14,24 +14,71 @@ def index(request):
     if form.is_valid():
         search = form.cleaned_data.get('search')
         location = form.cleaned_data.get('location')
+        skills = form.cleaned_data.get('skills')
         employment_type = form.cleaned_data.get('employment_type')
+        work_type = form.cleaned_data.get('work_type')
         experience_level = form.cleaned_data.get('experience_level')
+        salary_min = form.cleaned_data.get('salary_min')
+        salary_max = form.cleaned_data.get('salary_max')
+        visa_sponsorship = form.cleaned_data.get('visa_sponsorship')
+        remote_only = form.cleaned_data.get('remote_only')
 
+        # Text search across multiple fields
         if search:
             jobs = jobs.filter(
                 Q(title__icontains=search) |
                 Q(company__icontains=search) |
-                Q(description__icontains=search)
+                Q(description__icontains=search) |
+                Q(requirements__icontains=search) |
+                Q(skills_required__icontains=search)
             )
 
+        # Location filter
         if location:
             jobs = jobs.filter(location__icontains=location)
 
+        # Skills filter
+        if skills:
+            skill_keywords = [skill.strip() for skill in skills.split(',') if skill.strip()]
+            skill_query = Q()
+            for skill in skill_keywords:
+                skill_query |= (
+                    Q(skills_required__icontains=skill) |
+                    Q(requirements__icontains=skill) |
+                    Q(description__icontains=skill)
+                )
+            jobs = jobs.filter(skill_query)
+
+        # Employment type filter
         if employment_type:
             jobs = jobs.filter(employment_type=employment_type)
 
+        # Work type filter
+        if work_type:
+            jobs = jobs.filter(work_type=work_type)
+
+        # Experience level filter
         if experience_level:
             jobs = jobs.filter(experience_level=experience_level)
+
+        # Salary range filters
+        if salary_min:
+            jobs = jobs.filter(
+                Q(salary_min__gte=salary_min) | Q(salary_max__gte=salary_min)
+            )
+
+        if salary_max:
+            jobs = jobs.filter(
+                Q(salary_max__lte=salary_max) | Q(salary_min__lte=salary_max)
+            )
+
+        # Visa sponsorship filter
+        if visa_sponsorship:
+            jobs = jobs.filter(visa_sponsorship=True)
+
+        # Remote work filter
+        if remote_only:
+            jobs = jobs.filter(work_type__in=['remote', 'hybrid'])
 
     context = {
         'template_data': {'title': 'Jobs - HireBuzz'},

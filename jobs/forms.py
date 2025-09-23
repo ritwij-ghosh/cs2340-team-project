@@ -9,6 +9,7 @@ class JobForm(forms.ModelForm):
         model = Job
         fields = [
             'title', 'company', 'location', 'employment_type', 'experience_level',
+            'work_type', 'skills_required', 'visa_sponsorship',
             'description', 'requirements', 'benefits', 'salary_min', 'salary_max',
             'status', 'application_deadline', 'external_url'
         ]
@@ -30,6 +31,17 @@ class JobForm(forms.ModelForm):
             }),
             'experience_level': forms.Select(attrs={
                 'class': 'form-select'
+            }),
+            'work_type': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'skills_required': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 2,
+                'placeholder': 'e.g., Python, Django, React, PostgreSQL'
+            }),
+            'visa_sponsorship': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
             }),
             'description': forms.Textarea(attrs={
                 'class': 'form-control',
@@ -113,8 +125,25 @@ class JobSearchForm(forms.Form):
         })
     )
 
+    skills = forms.CharField(
+        max_length=200,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Skills (e.g., Python, Django, React)...'
+        })
+    )
+
     employment_type = forms.ChoiceField(
         choices=[('', 'Any Employment Type')] + Job.EMPLOYMENT_TYPE_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={
+            'class': 'form-select'
+        })
+    )
+
+    work_type = forms.ChoiceField(
+        choices=[('', 'Any Work Type')] + Job.WORK_TYPE_CHOICES,
         required=False,
         widget=forms.Select(attrs={
             'class': 'form-select'
@@ -128,3 +157,54 @@ class JobSearchForm(forms.Form):
             'class': 'form-select'
         })
     )
+
+    # Salary range filters
+    salary_min = forms.DecimalField(
+        max_digits=10,
+        decimal_places=0,
+        required=False,
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Min salary',
+            'step': '1000'
+        })
+    )
+
+    salary_max = forms.DecimalField(
+        max_digits=10,
+        decimal_places=0,
+        required=False,
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Max salary',
+            'step': '1000'
+        })
+    )
+
+    # Boolean filters
+    visa_sponsorship = forms.BooleanField(
+        required=False,
+        widget=forms.CheckboxInput(attrs={
+            'class': 'form-check-input'
+        })
+    )
+
+    remote_only = forms.BooleanField(
+        required=False,
+        widget=forms.CheckboxInput(attrs={
+            'class': 'form-check-input'
+        })
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        salary_min = cleaned_data.get('salary_min')
+        salary_max = cleaned_data.get('salary_max')
+
+        # Validate salary range
+        if salary_min and salary_max and salary_min > salary_max:
+            raise forms.ValidationError(
+                "Minimum salary cannot be greater than maximum salary."
+            )
+
+        return cleaned_data
