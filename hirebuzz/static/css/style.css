@@ -30,3 +30,155 @@
 .hb-accent {
   color: #4cd7a8;
 }
+
+/* Dark theme form controls */
+.bg-dark .form-control {
+  background-color: #2c3e50 !important;
+  border-color: #495057 !important;
+  color: #e6edf3 !important;
+}
+
+.bg-dark .form-control:focus {
+  background-color: #34495e !important;
+  border-color: #4cd7a8 !important;
+  color: #e6edf3 !important;
+  box-shadow: 0 0 0 0.2rem rgba(76, 215, 168, 0.25) !important;
+}
+
+.bg-dark .form-control::placeholder {
+  color: #adb5bd !important;
+}
+
+.bg-dark .form-label {
+  color: #e6edf3 !important;
+}
+
+.bg-dark .form-text {
+  color: #adb5bd !important;
+}
+
+.bg-dark .text-muted {
+  color: #adb5bd !important;
+}
+
+.bg-dark .card-title {
+  color: #e6edf3 !important;
+}
+
+.bg-dark .card-text {
+  color: #e6edf3 !important;
+}
+
+.bg-dark .card-body {
+  color: #e6edf3 !important;
+}
+
+.bg-dark .text-light {
+  color: #e6edf3 !important;
+}
+
+/* Ensure all text in dark cards is light */
+.card.bg-dark * {
+  color: inherit;
+}
+
+.card.bg-dark .text-muted {
+  color: #adb5bd !important;
+}
+
+.card.bg-dark .text-primary {
+  color: #4cd7a8 !important;
+}
+
+/* Ensure better contrast for light text on dark backgrounds */
+.text-light {
+  color: #e6edf3 !important;
+}
+
+.profile-card .text-light {
+  color: #e6edf3 !important;
+}
+
+/* Make sure all text in dark cards is visible */
+.card.bg-dark,
+.card.profile-card {
+  color: #e6edf3 !important;
+}
+
+.card.bg-dark *,
+.card.profile-card * {
+  color: inherit;
+}
+
+.card.bg-dark .text-muted,
+.card.profile-card .text-muted {
+  color: #adb5bd !important;
+}
+
+/* Profile specific styling */
+.profile-card {
+  background-color: #1a1a1a !important;
+  border: 1px solid #495057 !important;
+}
+
+.profile-card .card-body {
+  color: #e6edf3 !important;
+}
+
+.profile-card .card-title {
+  color: #e6edf3 !important;
+}
+
+.profile-card .card-text {
+  color: #e6edf3 !important;
+}
+
+.profile-card .text-muted {
+  color: #adb5bd !important;
+}
+
+.profile-card .text-primary {
+  color: #4cd7a8 !important;
+}
+
+/* Form styling for dark theme */
+.dark-form .form-control {
+  background-color: #2c3e50 !important;
+  border-color: #495057 !important;
+  color: #e6edf3 !important;
+}
+
+.dark-form .form-control:focus {
+  background-color: #34495e !important;
+  border-color: #4cd7a8 !important;
+  color: #e6edf3 !important;
+  box-shadow: 0 0 0 0.2rem rgba(76, 215, 168, 0.25) !important;
+}
+
+.dark-form .form-label {
+  color: #e6edf3 !important;
+}
+
+.dark-form .form-text {
+  color: #adb5bd !important;
+}
+
+/* Navigation dropdown styling */
+.dropdown-menu-dark {
+  background-color: #1a1a1a !important;
+  border: 1px solid #495057 !important;
+}
+
+.dropdown-menu-dark .dropdown-item {
+  color: #e6edf3 !important;
+}
+
+.dropdown-menu-dark .dropdown-item:hover,
+.dropdown-menu-dark .dropdown-item:focus {
+  background-color: #2c3e50 !important;
+  color: #4cd7a8 !important;
+}
+
+.dropdown-menu-dark .dropdown-divider {
+  border-color: #495057 !important;
+}

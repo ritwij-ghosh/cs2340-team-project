@@ -17,7 +17,7 @@
     <!-- Header -->
     <nav class="navbar navbar-dark hb-nav navbar-expand-lg">
       <div class="container">
-        <a class="navbar-brand d-flex align-items-center gap-2" href="{% url 'home.index' %}">
+        <a class="navbar-brand d-flex align-items-center gap-2" href="{% url 'home:index' %}">
           <img src="{% static 'img/hirebuzz-logo.png' %}" alt="HireBuzz" height="36" />
           <span class="fw-bold">HireBuzz</span>
         </a>
@@ -33,12 +33,31 @@
 
         <div class="collapse navbar-collapse" id="hbNav">
           <div class="navbar-nav ms-auto">
-            <a class="nav-link" href="{% url 'home.index' %}">Home</a>
-            <a class="nav-link" href="{% url 'jobs.index' %}">Jobs</a>
-            <a class="nav-link" href="{% url 'profiles.index' %}">Profiles</a>
-            <a class="nav-link" href="{% url 'applications.index' %}">Applications</a>
-            <a class="nav-link" href="{% url 'communications.index' %}">Communications</a>
-            <a class="nav-link" href="{% url 'accounts.index' %}">Account</a>
+            <a class="nav-link" href="{% url 'home:index' %}">Home</a>
+            <a class="nav-link" href="{% url 'jobs:index' %}">Jobs</a>
+            <a class="nav-link" href="{% url 'profiles:index' %}">Profiles</a>
+            <a class="nav-link" href="{% url 'applications:index' %}">Applications</a>
+            <a class="nav-link" href="{% url 'communications:index' %}">Communications</a>
+            {% if user.is_authenticated %}
+              <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="accountDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  <i class="fas fa-user me-1"></i>{{ user.username }}
+                </a>
+                <ul class="dropdown-menu dropdown-menu-dark">
+                  <li><a class="dropdown-item" href="{% url 'accounts:index' %}">
+                    <i class="fas fa-cog me-2"></i>Account Settings
+                  </a></li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item" href="{% url 'accounts:logout' %}">
+                    <i class="fas fa-sign-out-alt me-2"></i>Logout
+                  </a></li>
+                </ul>
+              </div>
+            {% else %}
+              <a class="nav-link" href="{% url 'accounts:login' %}">
+                <i class="fas fa-sign-in-alt me-1"></i>Login
+              </a>
+            {% endif %}
           </div>
         </div>
       </div>

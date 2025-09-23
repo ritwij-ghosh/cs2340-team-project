@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-4">
+      <div class="card bg-dark border-secondary profile-card">
+        <div class="card-header text-light">
+          <h3 class="mb-0 text-light text-center">
+            <i class="fas fa-sign-in-alt me-2"></i>Login
+          </h3>
+        </div>
+        <div class="card-body text-light dark-form">
+          <form method="post">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+              <label for="username" class="form-label">Username</label>
+              <input type="text" class="form-control" id="username" name="username" required>
+            </div>
+            
+            <div class="mb-3">
+              <label for="password" class="form-label">Password</label>
+              <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+            
+            <div class="d-grid">
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-sign-in-alt me-1"></i>Login
+              </button>
+            </div>
+          </form>
+          
+          <div class="text-center mt-3">
+            <p class="text-light small">
+              Use the admin account: <strong>admin</strong> / <strong>admin123</strong>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
