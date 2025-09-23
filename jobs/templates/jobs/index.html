@@ -1,7 +1,109 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container">
-  <h2 class="mb-3">Jobs</h2>
-  <p>Browse open roles and tailor searches to your stack and interests.</p>
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="mb-1">Job Opportunities</h2>
+      <p class="text-muted mb-0">Browse open roles and tailor searches to your stack and interests.</p>
+    </div>
+    {% if user.is_authenticated %}
+      <div class="d-flex gap-2">
+        <a href="{% url 'jobs:my_jobs' %}" class="btn btn-outline-primary">
+          <i class="fas fa-briefcase me-1"></i>My Jobs
+        </a>
+        <a href="{% url 'jobs:post_job' %}" class="btn btn-primary">
+          <i class="fas fa-plus me-1"></i>Post a Job
+        </a>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Search and Filter Section -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <form method="get" class="row g-3">
+        <div class="col-md-4">
+          {{ search_form.search }}
+        </div>
+        <div class="col-md-3">
+          {{ search_form.location }}
+        </div>
+        <div class="col-md-2">
+          {{ search_form.employment_type }}
+        </div>
+        <div class="col-md-2">
+          {{ search_form.experience_level }}
+        </div>
+        <div class="col-md-1">
+          <button type="submit" class="btn btn-primary w-100">
+            <i class="fas fa-search"></i>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Job Listings -->
+  <div class="row">
+    {% for job in jobs %}
+      <div class="col-12 mb-3">
+        <div class="card h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h5 class="card-title mb-0">
+                <a href="{% url 'jobs:detail' job.pk %}" class="text-decoration-none">
+                  {{ job.title }}
+                </a>
+              </h5>
+              <small class="text-muted">{{ job.created_at|date:"M d, Y" }}</small>
+            </div>
+            <h6 class="text-primary mb-2">{{ job.company }}</h6>
+            <div class="mb-2">
+              <small class="text-muted">
+                <i class="fas fa-map-marker-alt me-1"></i>{{ job.location }}
+                <span class="mx-2">•</span>
+                <i class="fas fa-clock me-1"></i>{{ job.get_employment_type_display }}
+                <span class="mx-2">•</span>
+                <i class="fas fa-user-graduate me-1"></i>{{ job.get_experience_level_display }}
+              </small>
+            </div>
+            <p class="card-text text-muted">
+              {{ job.description|truncatewords:30 }}
+            </p>
+            {% if job.has_salary_range %}
+              <div class="mb-2">
+                <span class="badge bg-success">{{ job.get_salary_display }}</span>
+              </div>
+            {% endif %}
+            <div class="d-flex justify-content-between align-items-center">
+              <a href="{% url 'jobs:detail' job.pk %}" class="btn btn-outline-primary btn-sm">
+                View Details
+              </a>
+              {% if user == job.recruiter %}
+                <div class="btn-group" role="group">
+                  <a href="{% url 'jobs:edit_job' job.pk %}" class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-edit"></i> Edit
+                  </a>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="col-12">
+        <div class="text-center py-5">
+          <i class="fas fa-briefcase text-muted" style="font-size: 4rem;"></i>
+          <h4 class="mt-3 text-muted">No jobs found</h4>
+          <p class="text-muted">Try adjusting your search criteria or check back later for new opportunities.</p>
+          {% if user.is_authenticated %}
+            <a href="{% url 'jobs:post_job' %}" class="btn btn-primary mt-2">
+              <i class="fas fa-plus me-1"></i>Post the First Job
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
 </div>
 {% endblock content %}

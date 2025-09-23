@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="mb-0">
+            <i class="fas fa-plus-circle me-2"></i>Post a New Job
+          </h3>
+        </div>
+        <div class="card-body">
+          <form method="post">
+            {% csrf_token %}
+
+            <!-- Basic Information -->
+            <div class="row mb-4">
+              <div class="col-12">
+                <h5 class="border-bottom pb-2 mb-3">Basic Information</h5>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="{{ form.title.id_for_label }}" class="form-label">Job Title *</label>
+                {{ form.title }}
+                {% if form.title.errors %}
+                  <div class="text-danger small">{{ form.title.errors }}</div>
+                {% endif %}
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="{{ form.company.id_for_label }}" class="form-label">Company *</label>
+                {{ form.company }}
+                {% if form.company.errors %}
+                  <div class="text-danger small">{{ form.company.errors }}</div>
+                {% endif %}
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="{{ form.location.id_for_label }}" class="form-label">Location *</label>
+                {{ form.location }}
+                {% if form.location.errors %}
+                  <div class="text-danger small">{{ form.location.errors }}</div>
+                {% endif %}
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="{{ form.employment_type.id_for_label }}" class="form-label">Employment Type</label>
+                {{ form.employment_type }}
+                {% if form.employment_type.errors %}
+                  <div class="text-danger small">{{ form.employment_type.errors }}</div>
+                {% endif %}
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="{{ form.experience_level.id_for_label }}" class="form-label">Experience Level</label>
+                {{ form.experience_level }}
+                {% if form.experience_level.errors %}
+                  <div class="text-danger small">{{ form.experience_level.errors }}</div>
+                {% endif %}
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="{{ form.status.id_for_label }}" class="form-label">Status</label>
+                {{ form.status }}
+                {% if form.status.errors %}
+                  <div class="text-danger small">{{ form.status.errors }}</div>
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- Job Details -->
+            <div class="row mb-4">
+              <div class="col-12">
+                <h5 class="border-bottom pb-2 mb-3">Job Details</h5>
+              </div>
+              <div class="col-12 mb-3">
+                <label for="{{ form.description.id_for_label }}" class="form-label">Job Description *</label>
+                {{ form.description }}
+                <small class="form-text text-muted">Describe the role, responsibilities, and what the candidate will be doing.</small>
+                {% if form.description.errors %}
+                  <div class="text-danger small">{{ form.description.errors }}</div>
+                {% endif %}
+              </div>
+              <div class="col-12 mb-3">
+                <label for="{{ form.requirements.id_for_label }}" class="form-label">Requirements *</label>
+                {{ form.requirements }}
+                <small class="form-text text-muted">List required skills, experience, education, and qualifications.</small>
+                {% if form.requirements.errors %}
+                  <div class="text-danger small">{{ form.requirements.errors }}</div>
+                {% endif %}
+              </div>
+              <div class="col-12 mb-3">
+                <label for="{{ form.benefits.id_for_label }}" class="form-label">Benefits (Optional)</label>
+                {{ form.benefits }}
+                <small class="form-text text-muted">Health insurance, 401k, flexible schedule, remote work options, etc.</small>
+                {% if form.benefits.errors %}
+                  <div class="text-danger small">{{ form.benefits.errors }}</div>
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- Compensation & Application -->
+            <div class="row mb-4">
+              <div class="col-12">
+                <h5 class="border-bottom pb-2 mb-3">Compensation & Application</h5>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="{{ form.salary_min.id_for_label }}" class="form-label">Minimum Salary (Optional)</label>
+                {{ form.salary_min }}
+                {% if form.salary_min.errors %}
+                  <div class="text-danger small">{{ form.salary_min.errors }}</div>
+                {% endif %}
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="{{ form.salary_max.id_for_label }}" class="form-label">Maximum Salary (Optional)</label>
+                {{ form.salary_max }}
+                {% if form.salary_max.errors %}
+                  <div class="text-danger small">{{ form.salary_max.errors }}</div>
+                {% endif %}
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="{{ form.application_deadline.id_for_label }}" class="form-label">Application Deadline (Optional)</label>
+                {{ form.application_deadline }}
+                {% if form.application_deadline.errors %}
+                  <div class="text-danger small">{{ form.application_deadline.errors }}</div>
+                {% endif %}
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="{{ form.external_url.id_for_label }}" class="form-label">External Application URL (Optional)</label>
+                {{ form.external_url }}
+                <small class="form-text text-muted">Link to your company's application page.</small>
+                {% if form.external_url.errors %}
+                  <div class="text-danger small">{{ form.external_url.errors }}</div>
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- Form Errors -->
+            {% if form.non_field_errors %}
+              <div class="alert alert-danger">
+                {{ form.non_field_errors }}
+              </div>
+            {% endif %}
+
+            <!-- Submit Buttons -->
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save me-1"></i>Post Job
+              </button>
+              <a href="{% url 'jobs:index' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-times me-1"></i>Cancel
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
