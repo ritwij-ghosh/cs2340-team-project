@@ -1,0 +1,32 @@
+/* Fonts + body */
+.hb-body {
+  font-family: "Inter", "DM Sans", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background: #0b132b; /* deep blue backdrop */
+  color: #e6edf3;
+}
+
+/* Navbar (subtle gradient + hiring accent) */
+.hb-nav {
+  background: linear-gradient(90deg, #1c2541, #1b3a4b);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.navbar a.nav-link {
+  color: #e6edf3 !important;
+  opacity: 0.9;
+}
+.navbar a.nav-link:hover,
+.navbar a.nav-link:focus {
+  color: #4cd7a8 !important; /* hiring/career accent (teal/green) */
+  opacity: 1;
+}
+
+/* Main spacing so content doesn't hug the navbar */
+.hb-main {
+  padding: 24px 0;
+}
+
+/* Utility: buttons or tags could use this accent later */
+.hb-accent {
+  color: #4cd7a8;
+}
