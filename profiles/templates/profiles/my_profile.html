@@ -18,6 +18,16 @@
         </div>
       </div>
 
+      {% if not profile.is_public %}
+      <div class="alert alert-warning" role="alert">
+        Your profile is currently hidden from recruiters. Turn on visibility in the privacy settings section when you are ready to share it.
+      </div>
+      {% else %}
+      <div class="alert alert-info" role="alert">
+        Your profile is visible to recruiters based on the privacy rules set below.
+      </div>
+      {% endif %}
+
       <div class="card bg-dark border-secondary profile-card">
         <div class="card-body text-light">
           <!-- Header Section -->
@@ -33,6 +43,9 @@
                   {% if profile.location %}
                     <p class="text-muted mb-0">
                       <i class="fas fa-map-marker-alt me-1"></i>{{ profile.location }}
+                      {% if profile.location and not profile.show_location %}
+                        <span class="badge bg-warning text-dark ms-2">Hidden from recruiters</span>
+                      {% endif %}
                     </p>
                   {% endif %}
                 </div>
@@ -51,8 +64,11 @@
             <div class="mb-4">
               <h5 class="text-primary mb-3">
                 <i class="fas fa-user-circle me-2"></i>About Me
-              </h5>
+                </h5>
               <p class="mb-0 text-light">{{ profile.bio|linebreaks }}</p>
+              {% if not profile.show_bio %}
+                <div class="mt-2"><span class="badge bg-warning text-dark">Hidden from recruiters</span></div>
+              {% endif %}
             </div>
           {% endif %}
 
@@ -76,6 +92,9 @@
             <div class="bg-dark border rounded p-3">
               <p class="mb-0 text-light">{{ profile.education|linebreaks }}</p>
             </div>
+            {% if not profile.show_education %}
+              <div class="mt-2"><span class="badge bg-warning text-dark">Hidden from recruiters</span></div>
+            {% endif %}
           </div>
 
           <!-- Work Experience Section -->
@@ -86,6 +105,9 @@
             <div class="bg-dark border rounded p-3">
               <p class="mb-0 text-light">{{ profile.work_experience|linebreaks }}</p>
             </div>
+            {% if not profile.show_work_experience %}
+              <div class="mt-2"><span class="badge bg-warning text-dark">Hidden from recruiters</span></div>
+            {% endif %}
           </div>
 
           <!-- Contact Information -->
@@ -97,6 +119,9 @@
               <p class="mb-0 text-light">
                 <i class="fas fa-phone me-2"></i>{{ profile.phone }}
               </p>
+              {% if not profile.show_phone %}
+                <div class="mt-2"><span class="badge bg-warning text-dark">Hidden from recruiters</span></div>
+              {% endif %}
             </div>
           {% endif %}
 
@@ -136,8 +161,27 @@
                   </div>
                 {% endif %}
               </div>
+              {% if not profile.show_links %}
+                <div class="mt-2"><span class="badge bg-warning text-dark">Hidden from recruiters</span></div>
+              {% endif %}
             </div>
           {% endif %}
+
+          <!-- Privacy Summary -->
+          <div class="mb-2">
+            <h5 class="text-primary mb-3">
+              <i class="fas fa-shield-alt me-2"></i>Privacy Settings Overview
+            </h5>
+            <ul class="list-unstyled small text-muted">
+              <li><strong>Profile visibility:</strong> {{ profile.is_public|yesno:"Public to recruiters,Private - only visible to you" }}</li>
+              <li><strong>Bio:</strong> {{ profile.show_bio|yesno:"Visible,Hidden" }}</li>
+              <li><strong>Location:</strong> {{ profile.show_location|yesno:"Visible,Hidden" }}</li>
+              <li><strong>Phone:</strong> {{ profile.show_phone|yesno:"Visible,Hidden" }}</li>
+              <li><strong>Education:</strong> {{ profile.show_education|yesno:"Visible,Hidden" }}</li>
+              <li><strong>Work experience:</strong> {{ profile.show_work_experience|yesno:"Visible,Hidden" }}</li>
+              <li><strong>Professional links:</strong> {{ profile.show_links|yesno:"Visible,Hidden" }}</li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>

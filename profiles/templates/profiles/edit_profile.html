@@ -167,7 +167,84 @@
                 </div>
               </div>
             </div>
-            
+
+            <!-- Privacy Settings -->
+            <div class="mb-4">
+              <h5 class="text-primary mb-3">
+                <i class="fas fa-shield-alt me-2"></i>Privacy Controls
+              </h5>
+              <div class="form-check form-switch mb-3">
+                {{ form.is_public }}
+                <label class="form-check-label" for="{{ form.is_public.id_for_label }}">Make my profile visible to recruiters</label>
+                {% if form.is_public.help_text %}
+                  <div class="form-text">{{ form.is_public.help_text }}</div>
+                {% endif %}
+                {% if form.is_public.errors %}
+                  <div class="text-danger small">{{ form.is_public.errors.0 }}</div>
+                {% endif %}
+              </div>
+              <div class="form-check form-switch mb-3">
+                {{ form.show_bio }}
+                <label class="form-check-label" for="{{ form.show_bio.id_for_label }}">Show my bio</label>
+                {% if form.show_bio.help_text %}
+                  <div class="form-text">{{ form.show_bio.help_text }}</div>
+                {% endif %}
+                {% if form.show_bio.errors %}
+                  <div class="text-danger small">{{ form.show_bio.errors.0 }}</div>
+                {% endif %}
+              </div>
+              <div class="form-check form-switch mb-3">
+                {{ form.show_location }}
+                <label class="form-check-label" for="{{ form.show_location.id_for_label }}">Show my location</label>
+                {% if form.show_location.help_text %}
+                  <div class="form-text">{{ form.show_location.help_text }}</div>
+                {% endif %}
+                {% if form.show_location.errors %}
+                  <div class="text-danger small">{{ form.show_location.errors.0 }}</div>
+                {% endif %}
+              </div>
+              <div class="form-check form-switch mb-3">
+                {{ form.show_phone }}
+                <label class="form-check-label" for="{{ form.show_phone.id_for_label }}">Show my phone number</label>
+                {% if form.show_phone.help_text %}
+                  <div class="form-text">{{ form.show_phone.help_text }}</div>
+                {% endif %}
+                {% if form.show_phone.errors %}
+                  <div class="text-danger small">{{ form.show_phone.errors.0 }}</div>
+                {% endif %}
+              </div>
+              <div class="form-check form-switch mb-3">
+                {{ form.show_education }}
+                <label class="form-check-label" for="{{ form.show_education.id_for_label }}">Show my education</label>
+                {% if form.show_education.help_text %}
+                  <div class="form-text">{{ form.show_education.help_text }}</div>
+                {% endif %}
+                {% if form.show_education.errors %}
+                  <div class="text-danger small">{{ form.show_education.errors.0 }}</div>
+                {% endif %}
+              </div>
+              <div class="form-check form-switch mb-3">
+                {{ form.show_work_experience }}
+                <label class="form-check-label" for="{{ form.show_work_experience.id_for_label }}">Show my work experience</label>
+                {% if form.show_work_experience.help_text %}
+                  <div class="form-text">{{ form.show_work_experience.help_text }}</div>
+                {% endif %}
+                {% if form.show_work_experience.errors %}
+                  <div class="text-danger small">{{ form.show_work_experience.errors.0 }}</div>
+                {% endif %}
+              </div>
+              <div class="form-check form-switch mb-3">
+                {{ form.show_links }}
+                <label class="form-check-label" for="{{ form.show_links.id_for_label }}">Show my professional links</label>
+                {% if form.show_links.help_text %}
+                  <div class="form-text">{{ form.show_links.help_text }}</div>
+                {% endif %}
+                {% if form.show_links.errors %}
+                  <div class="text-danger small">{{ form.show_links.errors.0 }}</div>
+                {% endif %}
+              </div>
+            </div>
+
             <div class="d-flex justify-content-between">
             <a href="{% url 'profiles:my_profile' %}" class="btn btn-outline-secondary">
               <i class="fas fa-arrow-left me-1"></i>Back to Profile
