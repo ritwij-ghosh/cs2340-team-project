@@ -204,3 +204,7 @@ settings_local.py
 
 CLAUDE.md
 scenario.md
+
+# Python caches
+__pycache__/
+*.py[cod]
