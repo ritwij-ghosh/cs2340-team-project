@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h2 class="mb-2">My Profile</h2>
+          <p class="text-muted">Manage your professional profile</p>
+        </div>
+        <div>
+          <a href="{% url 'profiles:edit' %}" class="btn btn-outline-primary me-2">
+            <i class="fas fa-edit me-1"></i>Edit Profile
+          </a>
+          <a href="{% url 'profiles:edit_user_info' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-user-cog me-1"></i>Account Info
+          </a>
+        </div>
+      </div>
+
+      <div class="card bg-dark border-secondary profile-card">
+        <div class="card-body text-light">
+          <!-- Header Section -->
+          <div class="row mb-4">
+            <div class="col-md-8">
+              <div class="d-flex align-items-center mb-3">
+                <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 80px; height: 80px;">
+                  <i class="fas fa-user fa-2x text-white"></i>
+                </div>
+                <div>
+                  <h3 class="mb-1 text-light">{{ user.get_full_name|default:user.username }}</h3>
+                  <h5 class="text-muted mb-2">{{ profile.headline }}</h5>
+                  {% if profile.location %}
+                    <p class="text-muted mb-0">
+                      <i class="fas fa-map-marker-alt me-1"></i>{{ profile.location }}
+                    </p>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4 text-md-end">
+              <div class="text-muted small">
+                <div>Created: {{ profile.created_at|date:"M d, Y" }}</div>
+                <div>Updated: {{ profile.updated_at|date:"M d, Y" }}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bio Section -->
+          {% if profile.bio %}
+            <div class="mb-4">
+              <h5 class="text-primary mb-3">
+                <i class="fas fa-user-circle me-2"></i>About Me
+              </h5>
+              <p class="mb-0 text-light">{{ profile.bio|linebreaks }}</p>
+            </div>
+          {% endif %}
+
+          <!-- Skills Section -->
+          <div class="mb-4">
+            <h5 class="text-primary mb-3">
+              <i class="fas fa-tools me-2"></i>Skills
+            </h5>
+            <div class="d-flex flex-wrap">
+              {% for skill in profile.get_skills_list %}
+                <span class="badge bg-secondary me-2 mb-2 fs-6">{{ skill }}</span>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- Education Section -->
+          <div class="mb-4">
+            <h5 class="text-primary mb-3">
+              <i class="fas fa-graduation-cap me-2"></i>Education
+            </h5>
+            <div class="bg-dark border rounded p-3">
+              <p class="mb-0 text-light">{{ profile.education|linebreaks }}</p>
+            </div>
+          </div>
+
+          <!-- Work Experience Section -->
+          <div class="mb-4">
+            <h5 class="text-primary mb-3">
+              <i class="fas fa-briefcase me-2"></i>Work Experience
+            </h5>
+            <div class="bg-dark border rounded p-3">
+              <p class="mb-0 text-light">{{ profile.work_experience|linebreaks }}</p>
+            </div>
+          </div>
+
+          <!-- Contact Information -->
+          {% if profile.phone %}
+            <div class="mb-4">
+              <h5 class="text-primary mb-3">
+                <i class="fas fa-phone me-2"></i>Contact Information
+              </h5>
+              <p class="mb-0 text-light">
+                <i class="fas fa-phone me-2"></i>{{ profile.phone }}
+              </p>
+            </div>
+          {% endif %}
+
+          <!-- Links Section -->
+          {% if profile.has_links %}
+            <div class="mb-4">
+              <h5 class="text-primary mb-3">
+                <i class="fas fa-link me-2"></i>Professional Links
+              </h5>
+              <div class="row">
+                {% if profile.linkedin_url %}
+                  <div class="col-md-6 mb-2">
+                    <a href="{{ profile.linkedin_url }}" target="_blank" class="btn btn-outline-primary w-100">
+                      <i class="fab fa-linkedin me-2"></i>LinkedIn
+                    </a>
+                  </div>
+                {% endif %}
+                {% if profile.github_url %}
+                  <div class="col-md-6 mb-2">
+                    <a href="{{ profile.github_url }}" target="_blank" class="btn btn-outline-dark w-100">
+                      <i class="fab fa-github me-2"></i>GitHub
+                    </a>
+                  </div>
+                {% endif %}
+                {% if profile.portfolio_url %}
+                  <div class="col-md-6 mb-2">
+                    <a href="{{ profile.portfolio_url }}" target="_blank" class="btn btn-outline-info w-100">
+                      <i class="fas fa-globe me-2"></i>Portfolio
+                    </a>
+                  </div>
+                {% endif %}
+                {% if profile.other_url %}
+                  <div class="col-md-6 mb-2">
+                    <a href="{{ profile.other_url }}" target="_blank" class="btn btn-outline-secondary w-100">
+                      <i class="fas fa-external-link-alt me-2"></i>Other
+                    </a>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
