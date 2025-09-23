@@ -1,7 +1,106 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="container">
-  <h2 class="mb-3">Communications</h2>
-  <p>Keep conversations with recruiters organized and searchable.</p>
+  <div class="row">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h2 class="mb-2 text-light">Communications</h2>
+          <p class="text-light">Manage your messages and communications</p>
+        </div>
+        {% if user.is_authenticated %}
+          <div>
+            <a href="{% url 'communications:send_email' %}" class="btn btn-primary me-2">
+              <i class="fas fa-envelope me-1"></i>Send Email
+            </a>
+            <a href="{% url 'communications:email_list' %}" class="btn btn-outline-primary">
+              <i class="fas fa-list me-1"></i>All Emails
+            </a>
+          </div>
+        {% endif %}
+      </div>
+
+      {% if user.is_authenticated %}
+        <div class="row">
+          <!-- Recent Sent Emails -->
+          <div class="col-md-6 mb-4">
+            <div class="card bg-dark border-secondary profile-card">
+              <div class="card-header text-light">
+                <h5 class="mb-0 text-light">
+                  <i class="fas fa-paper-plane me-2"></i>Recent Sent Emails
+                </h5>
+              </div>
+              <div class="card-body text-light">
+                {% if sent_emails %}
+                  {% for email in sent_emails %}
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom border-secondary">
+                      <div>
+                        <h6 class="mb-1 text-light">{{ email.subject }}</h6>
+                        <small class="text-light">To: {{ email.recipient.get_full_name|default:email.recipient.username }}</small>
+                        <br>
+                        <small class="text-muted">{{ email.sent_at|timesince }} ago</small>
+                      </div>
+                      <a href="{% url 'communications:email_detail' email.id %}" class="btn btn-sm btn-outline-primary">
+                        View
+                      </a>
+                    </div>
+                  {% endfor %}
+                {% else %}
+                  <p class="text-light">No sent emails yet.</p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Received Emails -->
+          <div class="col-md-6 mb-4">
+            <div class="card bg-dark border-secondary profile-card">
+              <div class="card-header text-light">
+                <h5 class="mb-0 text-light">
+                  <i class="fas fa-inbox me-2"></i>Recent Received Emails
+                  {% if unread_count > 0 %}
+                    <span class="badge bg-primary ms-2">{{ unread_count }}</span>
+                  {% endif %}
+                </h5>
+              </div>
+              <div class="card-body text-light">
+                {% if received_emails %}
+                  {% for email in received_emails %}
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom border-secondary">
+                      <div>
+                        <h6 class="mb-1 text-light {% if not email.is_read %}fw-bold{% endif %}">
+                          {{ email.subject }}
+                          {% if not email.is_read %}
+                            <i class="fas fa-circle text-primary" style="font-size: 8px;"></i>
+                          {% endif %}
+                        </h6>
+                        <small class="text-light">From: {{ email.sender.get_full_name|default:email.sender.username }}</small>
+                        <br>
+                        <small class="text-muted">{{ email.sent_at|timesince }} ago</small>
+                      </div>
+                      <a href="{% url 'communications:email_detail' email.id %}" class="btn btn-sm btn-outline-primary">
+                        View
+                      </a>
+                    </div>
+                  {% endfor %}
+                {% else %}
+                  <p class="text-light">No received emails yet.</p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      {% else %}
+        <div class="text-center py-5">
+          <i class="fas fa-envelope fa-3x text-light mb-3"></i>
+          <h4 class="text-light">Welcome to Communications</h4>
+          <p class="text-light">Login to manage your messages and communications</p>
+          <a href="{% url 'accounts:login' %}" class="btn btn-primary">
+            <i class="fas fa-sign-in-alt me-1"></i>Login
+          </a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
 </div>
 {% endblock content %}

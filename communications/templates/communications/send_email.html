@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card bg-dark border-secondary profile-card">
+        <div class="card-header text-light">
+          <h3 class="mb-0 text-light">
+            <i class="fas fa-envelope me-2"></i>Send Email to Candidate
+          </h3>
+          <p class="text-muted mb-0">Reach out to job seekers through their personal emails</p>
+        </div>
+        <div class="card-body text-light dark-form">
+          <form method="post">
+            {% csrf_token %}
+            
+            <!-- Recipient Selection -->
+            <div class="mb-4">
+              <h5 class="text-primary mb-3">
+                <i class="fas fa-user me-2"></i>Select Candidate
+              </h5>
+              <div class="mb-3">
+                <label for="{{ form.recipient.id_for_label }}" class="form-label">Recipient *</label>
+                {{ form.recipient }}
+                {% if form.recipient.help_text %}
+                  <div class="form-text">{{ form.recipient.help_text }}</div>
+                {% endif %}
+                {% if form.recipient.errors %}
+                  <div class="text-danger small">{{ form.recipient.errors.0 }}</div>
+                {% endif %}
+              </div>
+            </div>
+            
+            <!-- Email Content -->
+            <div class="mb-4">
+              <h5 class="text-primary mb-3">
+                <i class="fas fa-edit me-2"></i>Email Content
+              </h5>
+              
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="{{ form.email_type.id_for_label }}" class="form-label">Email Type *</label>
+                  {{ form.email_type }}
+                  {% if form.email_type.help_text %}
+                    <div class="form-text">{{ form.email_type.help_text }}</div>
+                  {% endif %}
+                  {% if form.email_type.errors %}
+                    <div class="text-danger small">{{ form.email_type.errors.0 }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="{{ form.subject.id_for_label }}" class="form-label">Subject *</label>
+                  {{ form.subject }}
+                  {% if form.subject.help_text %}
+                    <div class="form-text">{{ form.subject.help_text }}</div>
+                  {% endif %}
+                  {% if form.subject.errors %}
+                    <div class="text-danger small">{{ form.subject.errors.0 }}</div>
+                  {% endif %}
+                </div>
+              </div>
+              
+              <div class="mb-3">
+                <label for="{{ form.message.id_for_label }}" class="form-label">Message *</label>
+                {{ form.message }}
+                {% if form.message.help_text %}
+                  <div class="form-text">{{ form.message.help_text }}</div>
+                {% endif %}
+                {% if form.message.errors %}
+                  <div class="text-danger small">{{ form.message.errors.0 }}</div>
+                {% endif %}
+              </div>
+            </div>
+            
+            <!-- Optional Information -->
+            <div class="mb-4">
+              <h5 class="text-primary mb-3">
+                <i class="fas fa-info-circle me-2"></i>Additional Information (Optional)
+              </h5>
+              
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="{{ form.job_title.id_for_label }}" class="form-label">Job Title</label>
+                  {{ form.job_title }}
+                  {% if form.job_title.help_text %}
+                    <div class="form-text">{{ form.job_title.help_text }}</div>
+                  {% endif %}
+                  {% if form.job_title.errors %}
+                    <div class="text-danger small">{{ form.job_title.errors.0 }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="{{ form.company_name.id_for_label }}" class="form-label">Company Name</label>
+                  {{ form.company_name }}
+                  {% if form.company_name.help_text %}
+                    <div class="form-text">{{ form.company_name.help_text }}</div>
+                  {% endif %}
+                  {% if form.company_name.errors %}
+                    <div class="text-danger small">{{ form.company_name.errors.0 }}</div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+            
+            <div class="d-flex justify-content-between">
+              <a href="{% url 'communications:index' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Back to Communications
+              </a>
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-paper-plane me-1"></i>Send Email
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
