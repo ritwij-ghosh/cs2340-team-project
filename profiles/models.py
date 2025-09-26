@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.core.validators import URLValidator
+from django.core.validators import URLValidator, RegexValidator
 
 
 class Profile(models.Model):
@@ -17,7 +17,11 @@ class Profile(models.Model):
         help_text="A brief description about yourself and your career goals"
     )
     location = models.CharField(max_length=100, blank=True)
-    phone = models.CharField(max_length=20, blank=True)
+    phone = models.CharField(
+        max_length=20,
+        blank=True,
+        validators=[RegexValidator(r'^\d{10}$', 'Enter a valid 10-digit US phone number.')]
+    )
     
     # Skills
     skills = models.TextField(

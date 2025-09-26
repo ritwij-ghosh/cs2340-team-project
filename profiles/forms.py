@@ -1,3 +1,5 @@
+import re
+
 from django import forms
 from django.contrib.auth.models import User
 from .models import Profile
@@ -31,7 +33,7 @@ class ProfileForm(forms.ModelForm):
             }),
             'phone': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'e.g., (555) 123-4567'
+                'placeholder': '10-digit number (e.g., 5551234567)'
             }),
             'skills': forms.Textarea(attrs={
                 'class': 'form-control',
@@ -90,7 +92,19 @@ class ProfileForm(forms.ModelForm):
             'show_work_experience': 'Control whether your work experience appears on your public profile.',
             'show_links': 'Control whether your professional links appear on your public profile.',
         }
-    
+
+    def clean_phone(self):
+        """Ensure phone numbers are exactly 10 digits when provided."""
+        phone = self.cleaned_data.get('phone', '')
+        if not phone:
+            return phone
+
+        digits_only = re.sub(r'\D', '', phone)
+        if len(digits_only) != 10:
+            raise forms.ValidationError('Enter a valid 10-digit US phone number.')
+
+        return digits_only
+
     def clean_skills(self):
         """Clean and validate skills input."""
         skills = self.cleaned_data.get('skills', '')
