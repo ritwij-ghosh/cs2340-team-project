@@ -3,5 +3,31 @@
 <div class="container">
   <h2 class="mb-3">Jobs</h2>
   <p>Browse open roles and tailor searches to your stack and interests.</p>
+
+  <div class="card bg-dark text-light mt-4">
+    <div class="card-header">Quick Apply</div>
+    <div class="card-body">
+      <form method="post" action="{% url 'applications:quick_apply' %}">
+        {% csrf_token %}
+        <div class="row g-2 align-items-end">
+          <div class="col-md-4">
+            <label for="job_title" class="form-label">Job Title</label>
+            <input id="job_title" name="job_title" type="text" class="form-control" placeholder="e.g., Software Engineer" required>
+          </div>
+          <div class="col-md-4">
+            <label for="company_name" class="form-label">Company</label>
+            <input id="company_name" name="company_name" type="text" class="form-control" placeholder="e.g., Acme Corp" required>
+          </div>
+          <div class="col-md-12 mt-2">
+            <label for="note" class="form-label">Personalized Note (optional)</label>
+            <textarea id="note" name="note" class="form-control" rows="2" placeholder="Add a short note to personalize your application..."></textarea>
+          </div>
+          <div class="col-auto mt-3">
+            <button type="submit" class="btn btn-primary">One-Click Apply</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
 {% endblock content %}

@@ -4,13 +4,51 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from .models import Profile
 from .forms import ProfileForm, UserForm
+from django.db.models import Q
 
 
 def index(request):
     """Display all public profiles for browsing."""
     profiles = Profile.objects.filter(is_public=True)
+
+    # Filtering for recruiter search
+    skills_query = (request.GET.get('skills') or '').strip()
+    location_query = (request.GET.get('location') or '').strip()
+    projects_query = (request.GET.get('projects') or '').strip()
+
+    if location_query:
+        profiles = profiles.filter(location__icontains=location_query)
+
+    if skills_query:
+        # Split by comma and/or whitespace, match profiles whose skills contain all tokens
+        raw_tokens = [token.strip() for token in skills_query.replace('\n', ' ').replace('\t', ' ').split(',')]
+        tokens = []
+        for chunk in raw_tokens:
+            if not chunk:
+                continue
+            tokens.extend([t for t in chunk.split(' ') if t])
+        for token in tokens:
+            profiles = profiles.filter(skills__icontains=token)
+
+    if projects_query:
+        # Search across work experience and common profile text/link fields
+        profiles = profiles.filter(
+            Q(work_experience__icontains=projects_query)
+            | Q(bio__icontains=projects_query)
+            | Q(education__icontains=projects_query)
+            | Q(linkedin_url__icontains=projects_query)
+            | Q(github_url__icontains=projects_query)
+            | Q(portfolio_url__icontains=projects_query)
+            | Q(other_url__icontains=projects_query)
+        )
+
     context = {
         'profiles': profiles,
+        'filters': {
+            'skills': skills_query,
+            'location': location_query,
+            'projects': projects_query,
+        },
         'template_data': {'title': 'Profiles - HireBuzz'}
     }
     return render(request, 'profiles/index.html', context)
