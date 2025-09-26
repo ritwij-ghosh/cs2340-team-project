@@ -204,3 +204,5 @@ settings_local.py
 
 CLAUDE.md
 scenario.md
+
+*.sqlite3
