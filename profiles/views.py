@@ -8,7 +8,7 @@ from .forms import ProfileForm, UserForm
 
 def index(request):
     """Display all public profiles for browsing."""
-    profiles = Profile.objects.all()
+    profiles = Profile.objects.filter(is_public=True)
     context = {
         'profiles': profiles,
         'template_data': {'title': 'Profiles - HireBuzz'}
@@ -108,10 +108,16 @@ def view_profile(request, user_id):
     except Profile.DoesNotExist:
         messages.error(request, 'This user does not have a public profile.')
         return redirect('profiles:index')
-    
+
+    is_owner = request.user.is_authenticated and request.user == user
+    if not profile.is_public and not is_owner and not request.user.is_staff:
+        messages.warning(request, 'This profile is currently set to private.')
+        return redirect('profiles:index')
+
     context = {
         'profile': profile,
         'profile_user': user,
+        'is_owner': is_owner,
         'template_data': {'title': f'{user.get_full_name() or user.username} - Profile - HireBuzz'}
     }
     return render(request, 'profiles/view_profile.html', context)

@@ -1,11 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.core.validators import URLValidator
+from django.core.validators import URLValidator, RegexValidator
 
 
 class Profile(models.Model):
     """Job seeker profile model with comprehensive information for recruiters."""
-    
+
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     headline = models.CharField(
         max_length=200, 
@@ -17,7 +17,11 @@ class Profile(models.Model):
         help_text="A brief description about yourself and your career goals"
     )
     location = models.CharField(max_length=100, blank=True)
-    phone = models.CharField(max_length=20, blank=True)
+    phone = models.CharField(
+        max_length=20,
+        blank=True,
+        validators=[RegexValidator(r'^\d{10}$', 'Enter a valid 10-digit US phone number.')]
+    )
     
     # Skills
     skills = models.TextField(
@@ -51,11 +55,41 @@ class Profile(models.Model):
         help_text="Your portfolio or personal website URL"
     )
     other_url = models.URLField(
-        blank=True, 
+        blank=True,
         validators=[URLValidator()],
         help_text="Any other relevant URL (e.g., personal blog, Stack Overflow)"
     )
-    
+
+    # Privacy Settings
+    is_public = models.BooleanField(
+        default=True,
+        help_text="Allow recruiters to find and view your profile."
+    )
+    show_bio = models.BooleanField(
+        default=True,
+        help_text="Display your bio on your public profile."
+    )
+    show_location = models.BooleanField(
+        default=True,
+        help_text="Display your location on your public profile."
+    )
+    show_phone = models.BooleanField(
+        default=False,
+        help_text="Display your phone number so recruiters can contact you directly."
+    )
+    show_education = models.BooleanField(
+        default=True,
+        help_text="Display your education history on your public profile."
+    )
+    show_work_experience = models.BooleanField(
+        default=True,
+        help_text="Display your work experience on your public profile."
+    )
+    show_links = models.BooleanField(
+        default=True,
+        help_text="Display your professional links to recruiters."
+    )
+
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -73,3 +107,7 @@ class Profile(models.Model):
     def has_links(self):
         """Check if profile has any social/professional links."""
         return any([self.linkedin_url, self.github_url, self.portfolio_url, self.other_url])
+
+    def has_public_links(self):
+        """Check if links should be shown to other users."""
+        return self.show_links and self.has_links()

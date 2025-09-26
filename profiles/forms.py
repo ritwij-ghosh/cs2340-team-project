@@ -1,3 +1,5 @@
+import re
+
 from django import forms
 from django.contrib.auth.models import User
 from .models import Profile
@@ -11,7 +13,9 @@ class ProfileForm(forms.ModelForm):
         fields = [
             'headline', 'bio', 'location', 'phone',
             'skills', 'education', 'work_experience',
-            'linkedin_url', 'github_url', 'portfolio_url', 'other_url'
+            'linkedin_url', 'github_url', 'portfolio_url', 'other_url',
+            'is_public', 'show_bio', 'show_location', 'show_phone',
+            'show_education', 'show_work_experience', 'show_links'
         ]
         widgets = {
             'headline': forms.TextInput(attrs={
@@ -29,7 +33,7 @@ class ProfileForm(forms.ModelForm):
             }),
             'phone': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'e.g., (555) 123-4567'
+                'placeholder': '10-digit number (e.g., 5551234567)'
             }),
             'skills': forms.Textarea(attrs={
                 'class': 'form-control',
@@ -62,6 +66,13 @@ class ProfileForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'https://yourblog.com or other relevant URL'
             }),
+            'is_public': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'show_bio': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'show_location': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'show_phone': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'show_education': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'show_work_experience': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'show_links': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
         help_texts = {
             'headline': 'A brief professional headline that describes your role or expertise',
@@ -73,8 +84,27 @@ class ProfileForm(forms.ModelForm):
             'github_url': 'Your GitHub profile URL',
             'portfolio_url': 'Your portfolio or personal website URL',
             'other_url': 'Any other relevant URL (e.g., personal blog, Stack Overflow)',
+            'is_public': 'Untick this if you want to hide your entire profile from recruiters.',
+            'show_bio': 'Control whether your bio appears on your public profile.',
+            'show_location': 'Control whether your location appears on your public profile.',
+            'show_phone': 'Allow recruiters to see your phone number.',
+            'show_education': 'Control whether your education history appears on your public profile.',
+            'show_work_experience': 'Control whether your work experience appears on your public profile.',
+            'show_links': 'Control whether your professional links appear on your public profile.',
         }
-    
+
+    def clean_phone(self):
+        """Ensure phone numbers are exactly 10 digits when provided."""
+        phone = self.cleaned_data.get('phone', '')
+        if not phone:
+            return phone
+
+        digits_only = re.sub(r'\D', '', phone)
+        if len(digits_only) != 10:
+            raise forms.ValidationError('Enter a valid 10-digit US phone number.')
+
+        return digits_only
+
     def clean_skills(self):
         """Clean and validate skills input."""
         skills = self.cleaned_data.get('skills', '')

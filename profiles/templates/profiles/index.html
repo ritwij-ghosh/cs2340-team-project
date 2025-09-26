@@ -42,13 +42,13 @@
                     </div>
                   </div>
                   
-                  {% if profile.location %}
+                  {% if profile.location and profile.show_location %}
                     <p class="text-light small mb-2">
                       <i class="fas fa-map-marker-alt me-1"></i>{{ profile.location }}
                     </p>
                   {% endif %}
-                  
-                  {% if profile.bio %}
+
+                  {% if profile.bio and profile.show_bio %}
                     <p class="card-text small text-light">{{ profile.bio|truncatewords:20 }}</p>
                   {% endif %}
                   
