@@ -2,6 +2,23 @@
 {% block content %}
 <div class="container">
   <h2 class="mb-3">Jobs</h2>
-  <p>Browse open roles and tailor searches to your stack and interests.</p>
+  {% if jobs %}
+    <div class="list-group">
+      {% for job in jobs %}
+        <div class="list-group-item bg-transparent text-light border-secondary mb-2">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <h5 class="mb-1">{{ job.title }}</h5>
+              <div class="small text-muted">{{ job.company }}{% if job.location %} • {{ job.location }}{% endif %}</div>
+            </div>
+            <div class="text-end small text-muted">{{ job.created_at|date:"M j, Y" }}</div>
+          </div>
+          <p class="mb-0 mt-2">{{ job.description|truncatechars:240 }}</p>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-muted">No approved jobs yet.</p>
+  {% endif %}
 </div>
 {% endblock content %}
