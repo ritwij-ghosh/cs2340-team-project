@@ -26,6 +26,42 @@
         {% endif %}
       </div>
 
+      <div class="card bg-dark text-light mb-4">
+        <div class="card-header">Recruiter Search</div>
+        <div class="card-body">
+          <form method="get" action="">
+            <div class="row g-2 align-items-end">
+              <div class="col-md-4">
+                <label for="skills" class="form-label">Skills</label>
+                <input id="skills" name="skills" type="text" class="form-control" placeholder="e.g., Python, Django, React" value="{{ filters.skills|default:'' }}">
+              </div>
+              <div class="col-md-4">
+                <label for="location" class="form-label">Location</label>
+                <input id="location" name="location" type="text" class="form-control" placeholder="e.g., Atlanta, GA" value="{{ filters.location|default:'' }}">
+              </div>
+              <div class="col-md-4">
+                <label for="projects" class="form-label">Projects / Keywords</label>
+                <input id="projects" name="projects" type="text" class="form-control" placeholder="e.g., e-commerce, ML, portfolio" value="{{ filters.projects|default:'' }}">
+              </div>
+              <div class="col-auto mt-3">
+                <button type="submit" class="btn btn-primary">Search</button>
+                <a href="{% url 'profiles:index' %}" class="btn btn-outline-secondary ms-1">Reset</a>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      {% if filters.skills or filters.location or filters.projects %}
+        <div class="mb-3">
+          <small class="text-light">Filters:
+            {% if filters.skills %}<span class="badge bg-secondary me-1">Skills: {{ filters.skills }}</span>{% endif %}
+            {% if filters.location %}<span class="badge bg-secondary me-1">Location: {{ filters.location }}</span>{% endif %}
+            {% if filters.projects %}<span class="badge bg-secondary me-1">Projects: {{ filters.projects }}</span>{% endif %}
+          </small>
+        </div>
+      {% endif %}
+
       {% if profiles %}
         <div class="row">
           {% for profile in profiles %}
