@@ -1,7 +1,115 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container">
-  <h2 class="mb-3">Communications</h2>
-  <p>Keep conversations with recruiters organized and searchable.</p>
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="mb-1">Communications</h2>
+      <p class="text-muted mb-0">Keep conversations organized and searchable.</p>
+    </div>
+    <div>
+      <a href="{% url 'communications:send_message' %}" class="btn btn-primary">
+        <i class="fas fa-plus me-1"></i>Send Message
+      </a>
+    </div>
+  </div>
+
+  {% if unread_count > 0 %}
+    <div class="alert alert-info">
+      <i class="fas fa-envelope me-2"></i>You have {{ unread_count }} unread message{{ unread_count|pluralize }}.
+    </div>
+  {% endif %}
+
+  <div class="row">
+    <!-- Received Messages -->
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">
+            <i class="fas fa-inbox me-2"></i>Received Messages
+            {% if unread_count > 0 %}
+              <span class="badge bg-primary ms-2">{{ unread_count }}</span>
+            {% endif %}
+          </h5>
+        </div>
+        <div class="card-body">
+          {% if received_messages %}
+            {% for message in received_messages %}
+              <div class="border-bottom pb-3 mb-3 {% if not message.is_read %}bg-light{% endif %}">
+                <div class="d-flex justify-content-between align-items-start">
+                  <div class="flex-grow-1">
+                    <h6 class="mb-1">
+                      <a href="{% url 'communications:view_message' message.id %}" class="text-decoration-none">
+                        {{ message.subject }}
+                      </a>
+                      {% if not message.is_read %}
+                        <span class="badge bg-primary ms-1">New</span>
+                      {% endif %}
+                    </h6>
+                    <p class="text-muted small mb-1">
+                      From: {{ message.sender.get_full_name|default:message.sender.username }}
+                      {% if message.subject|slice:":16" == "New Application for" %}
+                        <span class="badge bg-success ms-1">Application</span>
+                      {% endif %}
+                    </p>
+                    <p class="text-muted small mb-2">
+                      {{ message.sent_at|date:"M d, Y g:i A" }}
+                    </p>
+                    <p class="mb-2">{{ message.body|truncatewords:20 }}</p>
+                  </div>
+                  <div class="ms-3">
+                    <a href="{% url 'communications:reply_message' message.id %}" class="btn btn-sm btn-outline-primary">
+                      <i class="fas fa-reply"></i> Reply
+                    </a>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          {% else %}
+            <p class="text-muted">No received messages.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Sent Messages -->
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">
+            <i class="fas fa-paper-plane me-2"></i>Sent Messages
+          </h5>
+        </div>
+        <div class="card-body">
+          {% if sent_messages %}
+            {% for message in sent_messages %}
+              <div class="border-bottom pb-3 mb-3">
+                <div class="d-flex justify-content-between align-items-start">
+                  <div class="flex-grow-1">
+                    <h6 class="mb-1">
+                      <a href="{% url 'communications:view_message' message.id %}" class="text-decoration-none">
+                        {{ message.subject }}
+                      </a>
+                    </h6>
+                    <p class="text-muted small mb-1">
+                      To: {{ message.recipient.get_full_name|default:message.recipient.username }}
+                      {% if message.subject|slice:":16" == "New Application for" %}
+                        <span class="badge bg-success ms-1">Application</span>
+                      {% endif %}
+                    </p>
+                    <p class="text-muted small mb-2">
+                      {{ message.sent_at|date:"M d, Y g:i A" }}
+                    </p>
+                    <p class="mb-2">{{ message.body|truncatewords:20 }}</p>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          {% else %}
+            <p class="text-muted">No sent messages.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock content %}

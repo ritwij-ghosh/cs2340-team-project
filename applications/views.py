@@ -80,6 +80,39 @@ def quick_apply(request):
             company_name=company_name,
             notes=note
         )
+        
+        # Create a message to the recruiter about the application
+        from communications.models import Message
+        from django.contrib.auth.models import User
+        
+        # Find the recruiter who posted this job
+        try:
+            # Try to find the recruiter by company name
+            recruiter = User.objects.filter(
+                user_profile__user_type='recruiter',
+                user_profile__company__icontains=company_name
+            ).first()
+            
+            if recruiter:
+                # Create message about the application
+                message_subject = f"New Application for {job_title}"
+                message_body = f"Hello,\n\nI have applied for the {job_title} position at {company_name}."
+                
+                if note:
+                    message_body += f"\n\nPersonalized Note:\n{note}"
+                
+                message_body += f"\n\nBest regards,\n{request.user.get_full_name() or request.user.username}"
+                
+                Message.objects.create(
+                    sender=request.user,
+                    recipient=recruiter,
+                    subject=message_subject,
+                    body=message_body
+                )
+        except Exception as e:
+            # If message creation fails, don't break the application process
+            pass
+        
         messages.success(request, f'Applied to {job_title} at {company_name}.')
     except IntegrityError:
         # Likely duplicate for today due to unique_together including applied_on

@@ -9,6 +9,17 @@
           <p class="text-muted">{{ profile.headline }}</p>
         </div>
         <div>
+          {% if user.is_authenticated and not is_owner %}
+            {% if user.user_profile.is_recruiter and profile_user.user_profile.is_job_seeker %}
+              <a href="mailto:{{ profile_user.email }}?subject=Job Opportunity - {{ profile.headline }}" class="btn btn-primary me-2">
+                <i class="fas fa-envelope me-1"></i>Email Candidate
+              </a>
+            {% elif user.user_profile.is_job_seeker and profile_user.user_profile.is_recruiter %}
+              <a href="mailto:{{ profile_user.email }}?subject=Interest in Your Job Postings" class="btn btn-primary me-2">
+                <i class="fas fa-envelope me-1"></i>Email Recruiter
+              </a>
+            {% endif %}
+          {% endif %}
           <a href="{% url 'profiles:index' %}" class="btn btn-outline-secondary">
             <i class="fas fa-arrow-left me-1"></i>Back to Profiles
           </a>

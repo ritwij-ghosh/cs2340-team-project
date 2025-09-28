@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">{{ message.subject }}</h5>
+            <div>
+              {% if message.recipient == user %}
+                <a href="{% url 'communications:reply_message' message.id %}" class="btn btn-sm btn-primary">
+                  <i class="fas fa-reply me-1"></i>Reply
+                </a>
+              {% endif %}
+              <a href="{% url 'communications:index' %}" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Back
+              </a>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <strong>From:</strong> {{ message.sender.get_full_name|default:message.sender.username }}
+            </div>
+            <div class="col-md-6">
+              <strong>To:</strong> {{ message.recipient.get_full_name|default:message.recipient.username }}
+            </div>
+          </div>
+          
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <strong>Date:</strong> {{ message.sent_at|date:"M d, Y g:i A" }}
+            </div>
+            <div class="col-md-6">
+              <strong>Status:</strong> 
+              {% if message.is_read %}
+                <span class="badge bg-success">Read</span>
+              {% else %}
+                <span class="badge bg-warning">Unread</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <hr>
+
+          <div class="message-content">
+            {{ message.body|linebreaks }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
