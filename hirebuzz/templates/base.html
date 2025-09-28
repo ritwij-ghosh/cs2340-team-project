@@ -35,18 +35,38 @@
           <div class="navbar-nav ms-auto">
             <a class="nav-link" href="{% url 'home:index' %}">Home</a>
             <a class="nav-link" href="{% url 'jobs:index' %}">Jobs</a>
-            <a class="nav-link" href="{% url 'profiles:index' %}">Profiles</a>
-            <a class="nav-link" href="{% url 'applications:index' %}">Applications</a>
-            <a class="nav-link" href="{% url 'communications:index' %}">Communications</a>
+            {% if user.is_authenticated %}
+              {% if user.user_profile.is_recruiter %}
+                <a class="nav-link" href="{% url 'profiles:index' %}">Candidates</a>
+                <a class="nav-link" href="{% url 'jobs:my_jobs' %}">My Jobs</a>
+                <a class="nav-link" href="{% url 'jobs:post_job' %}">Post Job</a>
+              {% elif user.user_profile.is_job_seeker %}
+                <a class="nav-link" href="{% url 'applications:index' %}">My Applications</a>
+                <a class="nav-link" href="{% url 'profiles:my_profile' %}">My Profile</a>
+              {% endif %}
+            {% else %}
+              <a class="nav-link" href="{% url 'profiles:index' %}">Profiles</a>
+            {% endif %}
+            <a class="nav-link" href="{% url 'communications:index' %}">Messages</a>
             {% if user.is_authenticated %}
               <div class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="accountDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                   <i class="fas fa-user me-1"></i>{{ user.username }}
+                  {% if user.user_profile.is_recruiter %}
+                    <span class="badge bg-success ms-1">Recruiter</span>
+                  {% elif user.user_profile.is_job_seeker %}
+                    <span class="badge bg-primary ms-1">Job Seeker</span>
+                  {% endif %}
                 </a>
                 <ul class="dropdown-menu dropdown-menu-dark">
                   <li><a class="dropdown-item" href="{% url 'accounts:index' %}">
                     <i class="fas fa-cog me-2"></i>Account Settings
                   </a></li>
+                  {% if user.user_profile.is_job_seeker %}
+                    <li><a class="dropdown-item" href="{% url 'profiles:edit' %}">
+                      <i class="fas fa-edit me-2"></i>Edit Profile
+                    </a></li>
+                  {% endif %}
                   <li><hr class="dropdown-divider"></li>
                   <li><a class="dropdown-item" href="{% url 'accounts:logout' %}">
                     <i class="fas fa-sign-out-alt me-2"></i>Logout
