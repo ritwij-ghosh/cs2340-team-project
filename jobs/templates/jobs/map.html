@@ -119,50 +119,6 @@ document.addEventListener('DOMContentLoaded', function() {
         return div;
     };
     legend.addTo(map);
-    
-    // Add search functionality
-    const searchControl = L.control({position: 'topleft'});
-    searchControl.onAdd = function (map) {
-        const div = L.DomUtil.create('div', 'search-control bg-light p-2 rounded');
-        div.innerHTML = `
-            <input type="text" id="location-search" placeholder="Search location..." class="form-control form-control-sm mb-2">
-            <button id="search-btn" class="btn btn-primary btn-sm w-100">Search</button>
-        `;
-        
-        // Add search functionality
-        const searchInput = div.querySelector('#location-search');
-        const searchBtn = div.querySelector('#search-btn');
-        
-        searchBtn.addEventListener('click', function() {
-            const query = searchInput.value.trim();
-            if (query) {
-                // Use Nominatim API for geocoding
-                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data && data.length > 0) {
-                            const result = data[0];
-                            map.setView([parseFloat(result.lat), parseFloat(result.lon)], 10);
-                        } else {
-                            alert('Location not found');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Search error:', error);
-                        alert('Search failed');
-                    });
-            }
-        });
-        
-        searchInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                searchBtn.click();
-            }
-        });
-        
-        return div;
-    };
-    searchControl.addTo(map);
 });
 </script>
 
@@ -197,21 +153,6 @@ document.addEventListener('DOMContentLoaded', function() {
     background: white;
     border: 1px solid #ccc;
     border-radius: 5px;
-}
-
-.search-control {
-    background: white;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    min-width: 200px;
-}
-
-.search-control input {
-    border: 1px solid #ddd;
-}
-
-.search-control button {
-    font-size: 0.8em;
 }
 
 /* Make zoom controls black */
