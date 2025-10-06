@@ -8,6 +8,44 @@ from .models import Profile
 class ProfileForm(forms.ModelForm):
     """Form for creating and editing job seeker profiles."""
     
+    LOCATION_CHOICES = [
+        ('', 'Select your location...'),
+        ('Atlanta, GA', 'Atlanta, GA'),
+        ('Austin, TX', 'Austin, TX'),
+        ('Boston, MA', 'Boston, MA'),
+        ('Chicago, IL', 'Chicago, IL'),
+        ('Dallas, TX', 'Dallas, TX'),
+        ('Denver, CO', 'Denver, CO'),
+        ('Detroit, MI', 'Detroit, MI'),
+        ('Houston, TX', 'Houston, TX'),
+        ('Los Angeles, CA', 'Los Angeles, CA'),
+        ('Miami, FL', 'Miami, FL'),
+        ('Minneapolis, MN', 'Minneapolis, MN'),
+        ('Nashville, TN', 'Nashville, TN'),
+        ('New York, NY', 'New York, NY'),
+        ('Orlando, FL', 'Orlando, FL'),
+        ('Philadelphia, PA', 'Philadelphia, PA'),
+        ('Phoenix, AZ', 'Phoenix, AZ'),
+        ('Portland, OR', 'Portland, OR'),
+        ('San Antonio, TX', 'San Antonio, TX'),
+        ('San Diego, CA', 'San Diego, CA'),
+        ('San Francisco, CA', 'San Francisco, CA'),
+        ('Seattle, WA', 'Seattle, WA'),
+        ('Tampa, FL', 'Tampa, FL'),
+        ('Washington, DC', 'Washington, DC'),
+        ('Remote', 'Remote'),
+    ]
+    
+    location = forms.ChoiceField(
+        choices=LOCATION_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+            'id': 'location-select',
+            'style': 'background-color: #343a40; color: #ffffff; border-color: #495057;'
+        })
+    )
+    
     class Meta:
         model = Profile
         fields = [
@@ -27,10 +65,6 @@ class ProfileForm(forms.ModelForm):
                 'class': 'form-control',
                 'rows': 4,
                 'placeholder': 'Tell us about yourself and your career goals...'
-            }),
-            'location': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'e.g., Atlanta, GA'
             }),
             'phone': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -83,6 +117,7 @@ class ProfileForm(forms.ModelForm):
         help_texts = {
             'headline': 'A brief professional headline that describes your role or expertise',
             'bio': 'A brief description about yourself and your career goals',
+            'location': 'Select your city from the dropdown to see jobs in your area on the map',
             'skills': 'List your key skills separated by commas',
             'education': 'List your educational background',
             'work_experience': 'Describe your work experience with key achievements',

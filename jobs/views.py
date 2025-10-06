@@ -215,7 +215,7 @@ def map_view(request):
     
     # Get location from user's profile
     try:
-        user_profile = request.user.user_profile
+        user_profile = request.user.profile
         if user_profile.location:
             from jobs.utils import geocode_location
             profile_lat, profile_lon = geocode_location(user_profile.location)
@@ -226,22 +226,13 @@ def map_view(request):
         pass
     
     # Apply distance filtering if user location is available
-    if user_lat and user_lon:
-        try:
-            user_lat = float(user_lat)
-            user_lon = float(user_lon)
-            max_distance = float(max_distance)
-            
-            from jobs.utils import filter_jobs_by_distance
-            jobs_data = filter_jobs_by_distance(jobs_data, user_lat, user_lon, max_distance)
-        except (ValueError, TypeError):
-            # If invalid coordinates, use all jobs
-            pass
+    # Note: We'll pass all jobs to the template and let JavaScript handle distance filtering
+    # This allows for dynamic distance filtering without page reloads
     
     # Check if user has location in profile
     has_profile_location = False
     try:
-        user_profile = request.user.user_profile
+        user_profile = request.user.profile
         has_profile_location = bool(user_profile.location)
     except:
         pass
@@ -249,7 +240,7 @@ def map_view(request):
     context = {
         'template_data': {'title': 'Job Map - HireBuzz'},
         'jobs_data': jobs_data,
-        'jobs_count': len(jobs_data),
+        'jobs_count': len(jobs_data),  # Total jobs with coordinates
         'user_lat': user_lat,
         'user_lon': user_lon,
         'max_distance': max_distance,

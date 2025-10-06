@@ -1,5 +1,24 @@
 {% extends 'base.html' %}
 {% block content %}
+<style>
+#location-select {
+    background-color: #343a40 !important;
+    color: #ffffff !important;
+    border-color: #495057 !important;
+}
+
+#location-select option {
+    background-color: #343a40 !important;
+    color: #ffffff !important;
+}
+
+#location-select:focus {
+    background-color: #343a40 !important;
+    color: #ffffff !important;
+    border-color: #80bdff !important;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25) !important;
+}
+</style>
 <div class="container">
   <div class="row justify-content-center">
     <div class="col-lg-8">
@@ -287,3 +306,44 @@
   </div>
 </div>
 {% endblock content %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const locationSelect = document.getElementById('location-select');
+    
+    if (locationSelect) {
+        locationSelect.addEventListener('change', function() {
+            const selectedLocation = this.value;
+            
+            if (selectedLocation && selectedLocation !== '') {
+                // Show a message to the user
+                const message = document.createElement('div');
+                message.className = 'alert alert-info mt-3';
+                message.innerHTML = `
+                    <i class="fas fa-map-marker-alt me-2"></i>
+                    <strong>Location selected!</strong> 
+                    <a href="{% url 'jobs:map' %}" target="_blank" class="btn btn-sm btn-primary ms-2">
+                        <i class="fas fa-map me-1"></i>View Jobs Map
+                    </a>
+                `;
+                
+                // Remove any existing message
+                const existingMessage = document.querySelector('.alert-info');
+                if (existingMessage) {
+                    existingMessage.remove();
+                }
+                
+                // Add the new message after the location field
+                locationSelect.parentNode.parentNode.appendChild(message);
+                
+                // Auto-hide message after 5 seconds
+                setTimeout(() => {
+                    if (message.parentNode) {
+                        message.remove();
+                    }
+                }, 5000);
+            }
+        });
+    }
+});
+</script>

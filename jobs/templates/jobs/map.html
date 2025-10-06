@@ -16,10 +16,10 @@
               <select id="distanceFilter" class="form-select form-select-sm" style="width: auto;">
                 <option value="25">25 miles</option>
                 <option value="50">50 miles</option>
-                <option value="100" selected>100 miles</option>
+                <option value="100">100 miles</option>
                 <option value="200">200 miles</option>
                 <option value="500">500 miles</option>
-                <option value="all">All jobs</option>
+                <option value="all" selected>All jobs</option>
               </select>
             </div>
             <span class="badge bg-primary">{{ jobs_count }} jobs on map</span>
@@ -37,7 +37,7 @@
     {% if user_lat and user_lon %}
       <div class="alert alert-success m-3" role="alert" style="color: #0f5132;">
         <i class="fas fa-map-marker-alt me-2"></i>
-        <strong>Location loaded from your profile!</strong> Jobs are automatically filtered by distance from {{ request.user.user_profile.location }}.
+        <strong>Location loaded from your profile!</strong> Jobs are automatically filtered by distance from {{ request.user.profile.location }}.
       </div>
     {% endif %}
     {% if not user_lat and not user_lon and not has_profile_location %}
@@ -85,6 +85,57 @@ document.addEventListener('DOMContentLoaded', function() {
     // Create markers for each job
     let markers = [];
     let userLocationMarker = null;
+    let radiusCircle = null;
+    
+    // Function to create/update radius circle
+    function updateRadiusCircle(lat, lon, radiusMiles) {
+        // Remove existing circle
+        if (radiusCircle) {
+            map.removeLayer(radiusCircle);
+        }
+        
+        // Convert miles to meters (approximate)
+        const radiusMeters = radiusMiles * 1609.34;
+        
+        // Create circle
+        radiusCircle = L.circle([lat, lon], {
+            radius: radiusMeters,
+            color: '#007bff',
+            weight: 2,
+            opacity: 0.8,
+            fillColor: '#007bff',
+            fillOpacity: 0.1
+        }).addTo(map);
+        
+        // Zoom and center the map to show the circle area
+        // Calculate appropriate zoom level based on radius
+        let zoomLevel;
+        if (radiusMiles <= 25) {
+            zoomLevel = 8;
+        } else if (radiusMiles <= 50) {
+            zoomLevel = 7;
+        } else if (radiusMiles <= 100) {
+            zoomLevel = 6;
+        } else if (radiusMiles <= 200) {
+            zoomLevel = 5;
+        } else {
+            zoomLevel = 4;
+        }
+        
+        // Center map on user location and zoom to appropriate level
+        map.setView([lat, lon], zoomLevel);
+    }
+    
+    // Function to remove radius circle
+    function removeRadiusCircle() {
+        if (radiusCircle) {
+            map.removeLayer(radiusCircle);
+            radiusCircle = null;
+        }
+        
+        // Reset zoom to show all jobs across the country
+        map.setView([39.8283, -98.5795], 4);
+    }
     
     // Function to create job markers
     function createJobMarkers(jobs) {
@@ -181,6 +232,11 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (userLat && userLon && selectedDistance !== 'all') {
             filteredJobs = filterJobsByDistance(jobsData, userLat, userLon, parseFloat(selectedDistance));
+            // Show radius circle
+            updateRadiusCircle(userLat, userLon, parseFloat(selectedDistance));
+        } else {
+            // Hide radius circle when showing all jobs
+            removeRadiusCircle();
         }
         
         createJobMarkers(filteredJobs);
@@ -195,6 +251,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize map with current data
     createJobMarkers(jobsData);
+    
+    // Apply initial distance filtering if user location is available and not "All jobs"
+    if (userLat && userLon) {
+        const initialDistance = document.getElementById('distanceFilter').value;
+        if (initialDistance !== 'all') {
+            updateMapWithFilter();
+        }
+    }
     
     // Add user location marker if coordinates are available
     if (userLat && userLon) {
@@ -237,6 +301,10 @@ document.addEventListener('DOMContentLoaded', function() {
             <div class="d-flex align-items-center mt-2">
                 <div style="background-color: #dc3545; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; display: flex; align-items: center; justify-content: center;"><i class="fas fa-user" style="color: white; font-size: 6px;"></i></div>
                 <small style="color: black;">Your Profile Location</small>
+            </div>
+            <div class="d-flex align-items-center mt-1">
+                <div style="width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; border: 2px solid #007bff; background-color: rgba(0, 123, 255, 0.1);"></div>
+                <small style="color: black;">Distance Filter Radius</small>
             </div>
             ` : ''}
         `;
