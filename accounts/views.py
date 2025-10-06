@@ -6,6 +6,25 @@ from .forms import JobSeekerRegistrationForm, RecruiterRegistrationForm
 from .models import UserProfile
 
 def index(request):
+    """Account settings page - redirect job seekers to profile edit."""
+    if not request.user.is_authenticated:
+        return redirect('accounts:login')
+    
+    try:
+        user_profile = request.user.user_profile
+        if user_profile.is_job_seeker():
+            # Redirect job seekers to profile edit page
+            return redirect('profiles:edit')
+        elif user_profile.is_recruiter():
+            # Show recruiter account settings
+            context = {
+                'template_data': {'title': 'Account Settings - HireBuzz'}
+            }
+            return render(request, 'accounts/index.html', context)
+    except:
+        # If no user profile, redirect to profile creation
+        return redirect('profiles:create')
+    
     context = {
         'template_data': {'title': 'Account - HireBuzz'}
     }

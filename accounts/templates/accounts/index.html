@@ -1,7 +1,83 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="container">
-  <h2 class="mb-3">Account</h2>
-  <p>Manage profile, auth, and notifications.</p>
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card bg-dark border-secondary">
+        <div class="card-header text-light">
+          <h3 class="mb-0 text-light">
+            <i class="fas fa-cog me-2"></i>Account Settings
+          </h3>
+          <p class="text-muted mb-0">Manage your recruiter account and preferences</p>
+        </div>
+        <div class="card-body text-light">
+          
+          <!-- Account Information -->
+          <div class="mb-4">
+            <h5 class="text-primary mb-3">
+              <i class="fas fa-user me-2"></i>Account Information
+            </h5>
+            <div class="row">
+              <div class="col-md-6">
+                <p><strong>Username:</strong> {{ user.username }}</p>
+                <p><strong>Email:</strong> {{ user.email }}</p>
+                <p><strong>Name:</strong> {{ user.get_full_name|default:"Not set" }}</p>
+              </div>
+              <div class="col-md-6">
+                <p><strong>User Type:</strong> <span class="badge bg-success">Recruiter</span></p>
+                <p><strong>Company:</strong> {{ user.user_profile.company|default:"Not set" }}</p>
+                <p><strong>Member Since:</strong> {{ user.date_joined|date:"F Y" }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="mb-4">
+            <h5 class="text-primary mb-3">
+              <i class="fas fa-bolt me-2"></i>Quick Actions
+            </h5>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <a href="{% url 'jobs:post_job' %}" class="btn btn-primary w-100">
+                  <i class="fas fa-plus me-2"></i>Post New Job
+                </a>
+              </div>
+              <div class="col-md-6 mb-3">
+                <a href="{% url 'jobs:my_jobs' %}" class="btn btn-outline-primary w-100">
+                  <i class="fas fa-briefcase me-2"></i>Manage Jobs
+                </a>
+              </div>
+              <div class="col-md-6 mb-3">
+                <a href="{% url 'profiles:index' %}" class="btn btn-outline-success w-100">
+                  <i class="fas fa-users me-2"></i>Browse Candidates
+                </a>
+              </div>
+              <div class="col-md-6 mb-3">
+                <a href="{% url 'communications:index' %}" class="btn btn-outline-info w-100">
+                  <i class="fas fa-envelope me-2"></i>Messages
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Account Management -->
+          <div class="mb-4">
+            <h5 class="text-primary mb-3">
+              <i class="fas fa-tools me-2"></i>Account Management
+            </h5>
+            <div class="d-flex gap-2">
+              <a href="{% url 'profiles:edit_user_info' %}" class="btn btn-outline-light">
+                <i class="fas fa-edit me-1"></i>Edit Account Info
+              </a>
+              <a href="{% url 'accounts:logout' %}" class="btn btn-outline-danger">
+                <i class="fas fa-sign-out-alt me-1"></i>Logout
+              </a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock content %}

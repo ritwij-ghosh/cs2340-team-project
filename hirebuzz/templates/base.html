@@ -63,11 +63,6 @@
                   <li><a class="dropdown-item" href="{% url 'accounts:index' %}">
                     <i class="fas fa-cog me-2"></i>Account Settings
                   </a></li>
-                  {% if user.user_profile.is_job_seeker %}
-                    <li><a class="dropdown-item" href="{% url 'profiles:edit' %}">
-                      <i class="fas fa-edit me-2"></i>Edit Profile
-                    </a></li>
-                  {% endif %}
                   <li><hr class="dropdown-divider"></li>
                   <li><a class="dropdown-item" href="{% url 'accounts:logout' %}">
                     <i class="fas fa-sign-out-alt me-2"></i>Logout
