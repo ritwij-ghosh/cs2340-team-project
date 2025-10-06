@@ -59,6 +59,14 @@ class Profile(models.Model):
         validators=[URLValidator()],
         help_text="Any other relevant URL (e.g., personal blog, Stack Overflow)"
     )
+    
+    # Resume
+    resume = models.FileField(
+        upload_to='resumes/',
+        blank=True,
+        null=True,
+        help_text="Upload your resume (PDF, DOC, or DOCX format)"
+    )
 
     # Privacy Settings
     is_public = models.BooleanField(
@@ -89,6 +97,10 @@ class Profile(models.Model):
         default=True,
         help_text="Display your professional links to recruiters."
     )
+    show_resume = models.BooleanField(
+        default=True,
+        help_text="Allow recruiters to download your resume."
+    )
 
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
@@ -111,3 +123,11 @@ class Profile(models.Model):
     def has_public_links(self):
         """Check if links should be shown to other users."""
         return self.show_links and self.has_links()
+    
+    def has_resume(self):
+        """Check if profile has a resume uploaded."""
+        return bool(self.resume)
+    
+    def has_public_resume(self):
+        """Check if resume should be shown to other users."""
+        return self.show_resume and self.has_resume()

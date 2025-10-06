@@ -11,7 +11,7 @@
           <p class="text-muted mb-0">Tell recruiters about yourself and showcase your skills</p>
         </div>
         <div class="card-body text-light dark-form">
-          <form method="post">
+          <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             
             <!-- Basic Information -->
@@ -167,6 +167,23 @@
                 </div>
               </div>
             </div>
+            
+            <!-- Resume -->
+            <div class="mb-4">
+              <h5 class="text-primary mb-3">
+                <i class="fas fa-file-alt me-2"></i>Resume
+              </h5>
+              <div class="mb-3">
+                <label for="{{ form.resume.id_for_label }}" class="form-label">Resume File</label>
+                {{ form.resume }}
+                {% if form.resume.help_text %}
+                  <div class="form-text">{{ form.resume.help_text }}</div>
+                {% endif %}
+                {% if form.resume.errors %}
+                  <div class="text-danger small">{{ form.resume.errors.0 }}</div>
+                {% endif %}
+              </div>
+            </div>
 
             <!-- Privacy Settings -->
             <div class="mb-4">
@@ -241,6 +258,16 @@
                 {% endif %}
                 {% if form.show_links.errors %}
                   <div class="text-danger small">{{ form.show_links.errors.0 }}</div>
+                {% endif %}
+              </div>
+              <div class="form-check form-switch mb-3">
+                {{ form.show_resume }}
+                <label class="form-check-label" for="{{ form.show_resume.id_for_label }}">Allow recruiters to download my resume</label>
+                {% if form.show_resume.help_text %}
+                  <div class="form-text">{{ form.show_resume.help_text }}</div>
+                {% endif %}
+                {% if form.show_resume.errors %}
+                  <div class="text-danger small">{{ form.show_resume.errors.0 }}</div>
                 {% endif %}
               </div>
             </div>

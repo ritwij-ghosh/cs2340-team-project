@@ -14,8 +14,9 @@ class ProfileForm(forms.ModelForm):
             'headline', 'bio', 'location', 'phone',
             'skills', 'education', 'work_experience',
             'linkedin_url', 'github_url', 'portfolio_url', 'other_url',
+            'resume',
             'is_public', 'show_bio', 'show_location', 'show_phone',
-            'show_education', 'show_work_experience', 'show_links'
+            'show_education', 'show_work_experience', 'show_links', 'show_resume'
         ]
         widgets = {
             'headline': forms.TextInput(attrs={
@@ -66,6 +67,10 @@ class ProfileForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'https://yourblog.com or other relevant URL'
             }),
+            'resume': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': '.pdf,.doc,.docx'
+            }),
             'is_public': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'show_bio': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'show_location': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
@@ -73,6 +78,7 @@ class ProfileForm(forms.ModelForm):
             'show_education': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'show_work_experience': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'show_links': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'show_resume': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
         help_texts = {
             'headline': 'A brief professional headline that describes your role or expertise',
@@ -91,6 +97,8 @@ class ProfileForm(forms.ModelForm):
             'show_education': 'Control whether your education history appears on your public profile.',
             'show_work_experience': 'Control whether your work experience appears on your public profile.',
             'show_links': 'Control whether your professional links appear on your public profile.',
+            'resume': 'Upload your resume file (PDF, DOC, or DOCX format)',
+            'show_resume': 'Allow recruiters to download your resume.',
         }
 
     def clean_phone(self):
@@ -129,6 +137,22 @@ class ProfileForm(forms.ModelForm):
         if not work_experience.strip():
             raise forms.ValidationError("Please provide your work experience.")
         return work_experience.strip()
+    
+    def clean_resume(self):
+        """Validate resume file upload."""
+        resume = self.cleaned_data.get('resume')
+        if resume:
+            # Check file size (max 5MB)
+            if resume.size > 5 * 1024 * 1024:
+                raise forms.ValidationError("Resume file size cannot exceed 5MB.")
+            
+            # Check file extension
+            allowed_extensions = ['.pdf', '.doc', '.docx']
+            file_extension = resume.name.lower().split('.')[-1]
+            if f'.{file_extension}' not in allowed_extensions:
+                raise forms.ValidationError("Resume must be a PDF, DOC, or DOCX file.")
+        
+        return resume
 
 
 class UserForm(forms.ModelForm):
