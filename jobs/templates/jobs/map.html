@@ -11,6 +11,20 @@
             <i class="fas fa-map-marked-alt me-2"></i>Job Map
           </h3>
           <div class="d-flex align-items-center gap-3">
+            <div class="d-flex align-items-center gap-2">
+              <label for="distanceFilter" class="form-label mb-0 text-light">Distance:</label>
+              <select id="distanceFilter" class="form-select form-select-sm" style="width: auto;">
+                <option value="25">25 miles</option>
+                <option value="50">50 miles</option>
+                <option value="100" selected>100 miles</option>
+                <option value="200">200 miles</option>
+                <option value="500">500 miles</option>
+                <option value="all">All jobs</option>
+              </select>
+            </div>
+            <button id="getLocationBtn" class="btn btn-outline-light btn-sm">
+              <i class="fas fa-location-arrow me-1"></i>Use My Location
+            </button>
             <span class="badge bg-primary">{{ jobs_count }} jobs on map</span>
             <a href="{% url 'jobs:index' %}" class="btn btn-outline-light btn-sm">
               <i class="fas fa-list me-1"></i>List View
@@ -47,55 +61,169 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Job data from Django
     const jobsData = {{ jobs_data|safe }};
+    const userLat = {{ user_lat|default:"null" }};
+    const userLon = {{ user_lon|default:"null" }};
+    const maxDistance = {{ max_distance|default:"100" }};
     
     // Create markers for each job
-    const markers = [];
+    let markers = [];
+    let userLocationMarker = null;
     
-    jobsData.forEach(function(job) {
-        // Create custom icon based on work type
-        let iconColor = 'blue';
-        if (job.work_type === 'Remote') {
-            iconColor = 'green';
-        } else if (job.work_type === 'Hybrid') {
-            iconColor = 'orange';
-        }
+    // Function to create job markers
+    function createJobMarkers(jobs) {
+        // Clear existing markers
+        markers.forEach(marker => map.removeLayer(marker));
+        markers = [];
         
-        const customIcon = L.divIcon({
-            className: 'custom-div-icon',
-            html: `<div style="background-color: ${iconColor}; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
-            iconSize: [20, 20],
-            iconAnchor: [10, 10]
+        jobs.forEach(function(job) {
+            // Create custom icon based on work type
+            let iconColor = 'blue';
+            if (job.work_type === 'Remote') {
+                iconColor = 'green';
+            } else if (job.work_type === 'Hybrid') {
+                iconColor = 'orange';
+            }
+            
+            const customIcon = L.divIcon({
+                className: 'custom-div-icon',
+                html: `<div style="background-color: ${iconColor}; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
+                iconSize: [20, 20],
+                iconAnchor: [10, 10]
+            });
+            
+            // Create popup content with distance if available
+            let popupContent = `
+                <div class="job-popup">
+                    <h6 class="fw-bold mb-2" style="color: black;">${job.title}</h6>
+                    <p class="mb-1" style="color: black;"><strong>${job.company}</strong></p>
+                    <p class="mb-1" style="color: black;">${job.location}</p>
+            `;
+            
+            if (job.distance !== undefined) {
+                popupContent += `<p class="mb-1 text-primary"><strong>${job.distance} miles away</strong></p>`;
+            }
+            
+            popupContent += `
+                    <div class="mb-2">
+                        <span class="badge bg-primary me-1">${job.employment_type}</span>
+                        <span class="badge bg-secondary me-1">${job.work_type}</span>
+                    </div>
+                    ${job.salary_display !== 'Salary not specified' ? `<p class="mb-2 text-success"><strong>${job.salary_display}</strong></p>` : ''}
+                    ${job.skills.length > 0 ? `<p class="mb-2" style="color: black;"><small>Skills: ${job.skills.join(', ')}</small></p>` : ''}
+                    <a href="${job.url}" class="btn btn-primary btn-sm">View Details</a>
+                </div>
+            `;
+            
+            // Create marker
+            const marker = L.marker([job.latitude, job.longitude], { icon: customIcon })
+                .addTo(map)
+                .bindPopup(popupContent);
+            
+            markers.push(marker);
         });
         
-        // Create popup content
-        const popupContent = `
-            <div class="job-popup">
-                <h6 class="fw-bold mb-2" style="color: black;">${job.title}</h6>
-                <p class="mb-1" style="color: black;"><strong>${job.company}</strong></p>
-                <p class="mb-1" style="color: black;">${job.location}</p>
-                <div class="mb-2">
-                    <span class="badge bg-primary me-1">${job.employment_type}</span>
-                    <span class="badge bg-secondary me-1">${job.work_type}</span>
-                </div>
-                ${job.salary_display !== 'Salary not specified' ? `<p class="mb-2 text-success"><strong>${job.salary_display}</strong></p>` : ''}
-                ${job.skills.length > 0 ? `<p class="mb-2" style="color: black;"><small>Skills: ${job.skills.join(', ')}</small></p>` : ''}
-                <a href="${job.url}" class="btn btn-primary btn-sm">View Details</a>
-            </div>
-        `;
-        
-        // Create marker
-        const marker = L.marker([job.latitude, job.longitude], { icon: customIcon })
-            .addTo(map)
-            .bindPopup(popupContent);
-        
-        markers.push(marker);
-    });
-    
-    // Fit map to show all markers
-    if (markers.length > 0) {
-        const group = new L.featureGroup(markers);
-        map.fitBounds(group.getBounds().pad(0.1));
+        // Fit map to show all markers
+        if (markers.length > 0) {
+            const group = new L.featureGroup(markers);
+            map.fitBounds(group.getBounds().pad(0.1));
+        }
     }
+    
+    // Function to calculate distance between two points
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 3959; // Earth's radius in miles
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    }
+    
+    // Function to filter jobs by distance
+    function filterJobsByDistance(jobs, userLat, userLon, maxDistance) {
+        if (!userLat || !userLon || maxDistance === 'all') {
+            return jobs;
+        }
+        
+        const filteredJobs = jobs.filter(job => {
+            const distance = calculateDistance(userLat, userLon, job.latitude, job.longitude);
+            job.distance = Math.round(distance * 10) / 10; // Round to 1 decimal place
+            return distance <= maxDistance;
+        });
+        
+        // Sort by distance
+        return filteredJobs.sort((a, b) => a.distance - b.distance);
+    }
+    
+    // Function to update map with filtered jobs
+    function updateMapWithFilter() {
+        const selectedDistance = document.getElementById('distanceFilter').value;
+        let filteredJobs = jobsData;
+        
+        if (userLat && userLon && selectedDistance !== 'all') {
+            filteredJobs = filterJobsByDistance(jobsData, userLat, userLon, parseFloat(selectedDistance));
+        }
+        
+        createJobMarkers(filteredJobs);
+        
+        // Update job count badge
+        document.querySelector('.badge').textContent = `${filteredJobs.length} jobs on map`;
+    }
+    
+    // Geolocation functionality
+    function getCurrentLocation() {
+        if (!navigator.geolocation) {
+            alert('Geolocation is not supported by this browser.');
+            return;
+        }
+        
+        const button = document.getElementById('getLocationBtn');
+        button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Getting Location...';
+        button.disabled = true;
+        
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                
+                // Add user location marker
+                if (userLocationMarker) {
+                    map.removeLayer(userLocationMarker);
+                }
+                
+                userLocationMarker = L.marker([lat, lon], {
+                    icon: L.divIcon({
+                        className: 'user-location-icon',
+                        html: '<div style="background-color: red; width: 15px; height: 15px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>',
+                        iconSize: [15, 15],
+                        iconAnchor: [7.5, 7.5]
+                    })
+                }).addTo(map);
+                
+                // Reload page with location parameters
+                const url = new URL(window.location);
+                url.searchParams.set('lat', lat);
+                url.searchParams.set('lon', lon);
+                url.searchParams.set('distance', document.getElementById('distanceFilter').value);
+                window.location.href = url.toString();
+            },
+            function(error) {
+                console.error('Error getting location:', error);
+                alert('Unable to get your location. Please check your browser permissions.');
+                button.innerHTML = '<i class="fas fa-location-arrow me-1"></i>Use My Location';
+                button.disabled = false;
+            }
+        );
+    }
+    
+    // Event listeners
+    document.getElementById('getLocationBtn').addEventListener('click', getCurrentLocation);
+    document.getElementById('distanceFilter').addEventListener('change', updateMapWithFilter);
+    
+    // Initialize map with current data
+    createJobMarkers(jobsData);
     
     // Add legend
     const legend = L.control({position: 'bottomright'});
@@ -111,10 +239,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div style="background-color: orange; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px;"></div>
                 <small style="color: black;">Hybrid</small>
             </div>
-            <div class="d-flex align-items-center">
+            <div class="d-flex align-items-center mb-1">
                 <div style="background-color: green; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px;"></div>
                 <small style="color: black;">Remote</small>
             </div>
+            ${userLat && userLon ? `
+            <div class="d-flex align-items-center mt-2">
+                <div style="background-color: red; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px;"></div>
+                <small style="color: black;">Your Location</small>
+            </div>
+            ` : ''}
         `;
         return div;
     };
@@ -124,6 +258,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <style>
 .custom-div-icon {
+    background: none !important;
+    border: none !important;
+}
+
+.user-location-icon {
     background: none !important;
     border: none !important;
 }

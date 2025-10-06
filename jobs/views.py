@@ -208,10 +208,31 @@ def map_view(request):
             'skills': job.get_skills_list()[:3],  # First 3 skills
         })
     
+    # Get distance filter parameters
+    user_lat = request.GET.get('lat')
+    user_lon = request.GET.get('lon')
+    max_distance = request.GET.get('distance', '100')  # Default 100 miles
+    
+    # Apply distance filtering if user location is provided
+    if user_lat and user_lon:
+        try:
+            user_lat = float(user_lat)
+            user_lon = float(user_lon)
+            max_distance = float(max_distance)
+            
+            from jobs.utils import filter_jobs_by_distance
+            jobs_data = filter_jobs_by_distance(jobs_data, user_lat, user_lon, max_distance)
+        except (ValueError, TypeError):
+            # If invalid coordinates, use all jobs
+            pass
+    
     context = {
         'template_data': {'title': 'Job Map - HireBuzz'},
         'jobs_data': jobs_data,
         'jobs_count': len(jobs_data),
+        'user_lat': user_lat,
+        'user_lon': user_lon,
+        'max_distance': max_distance,
     }
     return render(request, 'jobs/map.html', context)
 

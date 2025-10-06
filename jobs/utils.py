@@ -1,5 +1,6 @@
 import requests
 import json
+import math
 from django.conf import settings
 from django.db.models import Q
 
@@ -77,3 +78,58 @@ def geocode_job_locations():
     
     print(f"Successfully geocoded {geocoded_count} jobs")
     return geocoded_count
+
+
+def calculate_distance(lat1, lon1, lat2, lon2):
+    """
+    Calculate the great circle distance between two points on Earth using the Haversine formula.
+    Returns distance in miles.
+    
+    Args:
+        lat1, lon1: First point coordinates (latitude, longitude)
+        lat2, lon2: Second point coordinates (latitude, longitude)
+    
+    Returns:
+        float: Distance in miles
+    """
+    # Convert latitude and longitude from degrees to radians
+    lat1, lon1, lat2, lon2 = map(math.radians, [lat1, lon1, lat2, lon2])
+    
+    # Haversine formula
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+    a = math.sin(dlat/2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon/2)**2
+    c = 2 * math.asin(math.sqrt(a))
+    
+    # Radius of earth in miles
+    r = 3959
+    
+    return c * r
+
+
+def filter_jobs_by_distance(jobs, user_lat, user_lon, max_distance_miles):
+    """
+    Filter jobs by distance from user's location.
+    
+    Args:
+        jobs: List of job dictionaries with latitude/longitude
+        user_lat: User's latitude
+        user_lon: User's longitude
+        max_distance_miles: Maximum distance in miles
+    
+    Returns:
+        list: Filtered and sorted jobs by distance
+    """
+    filtered_jobs = []
+    for job in jobs:
+        distance = calculate_distance(
+            user_lat, user_lon,
+            float(job['latitude']), float(job['longitude'])
+        )
+        if distance <= max_distance_miles:
+            job['distance'] = round(distance, 1)
+            filtered_jobs.append(job)
+    
+    # Sort by distance
+    filtered_jobs.sort(key=lambda x: x['distance'])
+    return filtered_jobs
