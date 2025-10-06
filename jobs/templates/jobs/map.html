@@ -216,14 +216,21 @@ document.addEventListener('DOMContentLoaded', function() {
                     map.removeLayer(userLocationMarker);
                 }
                 
-                userLocationMarker = L.marker([lat, lon], {
-                    icon: L.divIcon({
-                        className: 'user-location-icon',
-                        html: '<div style="background-color: red; width: 15px; height: 15px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>',
-                        iconSize: [15, 15],
-                        iconAnchor: [7.5, 7.5]
-                    })
-                }).addTo(map);
+                const userLocationIcon = L.divIcon({
+                    className: 'user-location-icon',
+                    html: '<div style="background-color: #dc3545; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><i class="fas fa-user" style="color: white; font-size: 10px;"></i></div>',
+                    iconSize: [20, 20],
+                    iconAnchor: [10, 10]
+                });
+                
+                userLocationMarker = L.marker([lat, lon], { icon: userLocationIcon })
+                    .addTo(map)
+                    .bindPopup(`
+                        <div style="text-align: center;">
+                            <h6 style="color: black; margin-bottom: 5px;"><i class="fas fa-user me-1"></i>Your Location</h6>
+                            <p style="color: black; margin: 0;">GPS location</p>
+                        </div>
+                    `);
                 
                 // Reload page with location parameters
                 const url = new URL(window.location);
@@ -248,6 +255,25 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize map with current data
     createJobMarkers(jobsData);
     
+    // Add user location marker if coordinates are available
+    if (userLat && userLon) {
+        const userLocationIcon = L.divIcon({
+            className: 'user-location-icon',
+            html: '<div style="background-color: #dc3545; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><i class="fas fa-user" style="color: white; font-size: 10px;"></i></div>',
+            iconSize: [20, 20],
+            iconAnchor: [10, 10]
+        });
+        
+        userLocationMarker = L.marker([userLat, userLon], { icon: userLocationIcon })
+            .addTo(map)
+            .bindPopup(`
+                <div style="text-align: center;">
+                    <h6 style="color: black; margin-bottom: 5px;"><i class="fas fa-user me-1"></i>Your Location</h6>
+                    <p style="color: black; margin: 0;">${isProfileLocation ? 'From your profile' : 'GPS location'}</p>
+                </div>
+            `);
+    }
+    
     // Add legend
     const legend = L.control({position: 'bottomright'});
     legend.onAdd = function (map) {
@@ -268,7 +294,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
             ${userLat && userLon ? `
             <div class="d-flex align-items-center mt-2">
-                <div style="background-color: red; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px;"></div>
+                <div style="background-color: #dc3545; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; display: flex; align-items: center; justify-content: center;"><i class="fas fa-user" style="color: white; font-size: 6px;"></i></div>
                 <small style="color: black;">${isProfileLocation ? 'Your Profile Location' : 'Your GPS Location'}</small>
             </div>
             ` : ''}
