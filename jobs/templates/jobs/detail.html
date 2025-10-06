@@ -164,7 +164,7 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="quickApplyModalLabel">Quick Apply</h5>
+          <h5 class="modal-title text-dark" id="quickApplyModalLabel">Quick Apply</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <form method="post" action="{% url 'applications:quick_apply' %}">
@@ -177,7 +177,7 @@
             <input type="hidden" name="job_title" value="{{ job.title }}">
             <input type="hidden" name="company_name" value="{{ job.company }}">
             <div class="mb-3">
-              <label for="note" class="form-label">Personalized Note (optional)</label>
+              <label for="note" class="form-label text-dark">Personalized Note (optional)</label>
               <textarea id="note" name="note" class="form-control" rows="4" placeholder="Add a short note to personalize your application..."></textarea>
               <small class="form-text text-muted">This note will be included with your application to help you stand out.</small>
             </div>
