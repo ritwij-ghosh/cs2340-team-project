@@ -2,8 +2,10 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q
+from django.http import JsonResponse
 from .models import Job
 from .forms import JobForm, JobSearchForm
+from .utils import geocode_location
 
 
 def index(request):
@@ -167,3 +169,83 @@ def delete_job(request, pk):
         'job': job,
     }
     return render(request, 'jobs/delete_job.html', context)
+
+
+@login_required
+def map_view(request):
+    """Display jobs on an interactive map for job seekers."""
+    # Only allow job seekers to view the map
+    try:
+        user_profile = request.user.user_profile
+        if not user_profile.is_job_seeker():
+            messages.warning(request, 'Only job seekers can view the job map.')
+            return redirect('jobs:index')
+    except:
+        messages.warning(request, 'Please complete your profile setup first.')
+        return redirect('profiles:create')
+    
+    # Get jobs with coordinates
+    jobs_with_coords = Job.objects.filter(
+        status='active',
+        latitude__isnull=False,
+        longitude__isnull=False
+    ).exclude(location__in=['Remote', 'remote', 'Anywhere', 'anywhere'])
+    
+    # Prepare job data for the map
+    jobs_data = []
+    for job in jobs_with_coords:
+        jobs_data.append({
+            'id': job.id,
+            'title': job.title,
+            'company': job.company,
+            'location': job.location,
+            'latitude': float(job.latitude),
+            'longitude': float(job.longitude),
+            'employment_type': job.get_employment_type_display(),
+            'work_type': job.get_work_type_display(),
+            'salary_display': job.get_salary_display(),
+            'url': job.get_absolute_url(),
+            'skills': job.get_skills_list()[:3],  # First 3 skills
+        })
+    
+    context = {
+        'template_data': {'title': 'Job Map - HireBuzz'},
+        'jobs_data': jobs_data,
+        'jobs_count': len(jobs_data),
+    }
+    return render(request, 'jobs/map.html', context)
+
+
+def geocode_job(request, job_id):
+    """API endpoint to geocode a specific job."""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+    
+    job = get_object_or_404(Job, id=job_id)
+    
+    if job.has_coordinates():
+        return JsonResponse({
+            'success': True,
+            'message': 'Job already has coordinates',
+            'latitude': float(job.latitude),
+            'longitude': float(job.longitude)
+        })
+    
+    lat, lon = geocode_location(job.location)
+    
+    if lat is not None and lon is not None:
+        job.latitude = lat
+        job.longitude = lon
+        job.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Job geocoded successfully',
+            'latitude': lat,
+            'longitude': lon
+        })
+    else:
+        return JsonResponse({
+            'success': False,
+            'message': 'Failed to geocode location'
+        }, status=400)

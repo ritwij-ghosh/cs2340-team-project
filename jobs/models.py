@@ -46,6 +46,20 @@ class Job(models.Model):
         max_length=100,
         help_text="Job location (e.g., 'Atlanta, GA' or 'Remote')"
     )
+    latitude = models.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        null=True,
+        blank=True,
+        help_text="Latitude coordinate for mapping"
+    )
+    longitude = models.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        null=True,
+        blank=True,
+        help_text="Longitude coordinate for mapping"
+    )
     employment_type = models.CharField(
         max_length=20,
         choices=EMPLOYMENT_TYPE_CHOICES,
@@ -166,3 +180,13 @@ class Job(models.Model):
     def is_remote_friendly(self):
         """Check if job allows remote work."""
         return self.work_type in ['remote', 'hybrid']
+
+    def has_coordinates(self):
+        """Check if job has latitude and longitude coordinates."""
+        return self.latitude is not None and self.longitude is not None
+
+    def get_coordinates(self):
+        """Return coordinates as a tuple if available."""
+        if self.has_coordinates():
+            return (float(self.latitude), float(self.longitude))
+        return None

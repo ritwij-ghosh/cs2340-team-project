@@ -8,12 +8,18 @@
     </div>
     {% if user.is_authenticated %}
     <div class="d-flex gap-2">
-      <a href="{% url 'jobs:my_jobs' %}" class="btn btn-outline-primary">
-        <i class="fas fa-briefcase me-1"></i>My Jobs
-      </a>
-      <a href="{% url 'jobs:post_job' %}" class="btn btn-primary">
-        <i class="fas fa-plus me-1"></i>Post a Job
-      </a>
+      {% if user.user_profile.is_job_seeker %}
+        <a href="{% url 'jobs:map' %}" class="btn btn-outline-success">
+          <i class="fas fa-map-marked-alt me-1"></i>Job Map
+        </a>
+      {% elif user.user_profile.is_recruiter %}
+        <a href="{% url 'jobs:my_jobs' %}" class="btn btn-outline-primary">
+          <i class="fas fa-briefcase me-1"></i>My Jobs
+        </a>
+        <a href="{% url 'jobs:post_job' %}" class="btn btn-primary">
+          <i class="fas fa-plus me-1"></i>Post a Job
+        </a>
+      {% endif %}
     </div>
     {% endif %}
   </div>
