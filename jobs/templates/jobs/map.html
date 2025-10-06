@@ -22,9 +22,6 @@
                 <option value="all">All jobs</option>
               </select>
             </div>
-            <button id="getLocationBtn" class="btn btn-outline-light btn-sm">
-              <i class="fas fa-location-arrow me-1"></i>Use GPS Location
-            </button>
             <span class="badge bg-primary">{{ jobs_count }} jobs on map</span>
             {% if user_lat and user_lon %}
               <span class="badge bg-success">
@@ -37,21 +34,21 @@
           </div>
         </div>
         <div class="card-body p-0">
-          {% if user_lat and user_lon and not request.GET.lat %}
-            <div class="alert alert-success m-3" role="alert" style="color: #0f5132;">
-              <i class="fas fa-map-marker-alt me-2"></i>
-              <strong>Location loaded from your profile!</strong> Jobs are automatically filtered by distance from {{ request.user.user_profile.location }}.
-            </div>
-          {% endif %}
-          {% if not user_lat and not user_lon and not has_profile_location %}
-            <div class="alert alert-info m-3" role="alert" style="color: #055160;">
-              <i class="fas fa-info-circle me-2"></i>
-              <strong>Tip:</strong> Add your location to your profile to automatically filter jobs by distance, or use the "Use GPS Location" button for one-time filtering.
-              <a href="{% url 'profiles:edit' %}" class="btn btn-sm btn-outline-primary ms-2">
-                <i class="fas fa-edit me-1"></i>Edit Profile
-              </a>
-            </div>
-          {% endif %}
+    {% if user_lat and user_lon %}
+      <div class="alert alert-success m-3" role="alert" style="color: #0f5132;">
+        <i class="fas fa-map-marker-alt me-2"></i>
+        <strong>Location loaded from your profile!</strong> Jobs are automatically filtered by distance from {{ request.user.user_profile.location }}.
+      </div>
+    {% endif %}
+    {% if not user_lat and not user_lon and not has_profile_location %}
+      <div class="alert alert-info m-3" role="alert" style="color: #055160;">
+        <i class="fas fa-info-circle me-2"></i>
+        <strong>Tip:</strong> Add your location to your profile to automatically filter jobs by distance.
+        <a href="{% url 'profiles:edit' %}" class="btn btn-sm btn-outline-primary ms-2">
+          <i class="fas fa-edit me-1"></i>Edit Profile
+        </a>
+      </div>
+    {% endif %}
           <div id="map" style="height: 600px; width: 100%;"></div>
         </div>
       </div>
@@ -84,9 +81,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const userLat = {{ user_lat|default:"null" }};
     const userLon = {{ user_lon|default:"null" }};
     const maxDistance = {{ max_distance|default:"100" }};
-    
-    // Check if location is from profile or GPS
-    const isProfileLocation = !window.location.search.includes('lat=');
     
     // Create markers for each job
     let markers = [];
@@ -195,61 +189,8 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelector('.badge').textContent = `${filteredJobs.length} jobs on map`;
     }
     
-    // Geolocation functionality
-    function getCurrentLocation() {
-        if (!navigator.geolocation) {
-            alert('Geolocation is not supported by this browser.');
-            return;
-        }
-        
-        const button = document.getElementById('getLocationBtn');
-        button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Getting Location...';
-        button.disabled = true;
-        
-        navigator.geolocation.getCurrentPosition(
-            function(position) {
-                const lat = position.coords.latitude;
-                const lon = position.coords.longitude;
-                
-                // Add user location marker
-                if (userLocationMarker) {
-                    map.removeLayer(userLocationMarker);
-                }
-                
-                const userLocationIcon = L.divIcon({
-                    className: 'user-location-icon',
-                    html: '<div style="background-color: #dc3545; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><i class="fas fa-user" style="color: white; font-size: 10px;"></i></div>',
-                    iconSize: [20, 20],
-                    iconAnchor: [10, 10]
-                });
-                
-                userLocationMarker = L.marker([lat, lon], { icon: userLocationIcon })
-                    .addTo(map)
-                    .bindPopup(`
-                        <div style="text-align: center;">
-                            <h6 style="color: black; margin-bottom: 5px;"><i class="fas fa-user me-1"></i>Your Location</h6>
-                            <p style="color: black; margin: 0;">GPS location</p>
-                        </div>
-                    `);
-                
-                // Reload page with location parameters
-                const url = new URL(window.location);
-                url.searchParams.set('lat', lat);
-                url.searchParams.set('lon', lon);
-                url.searchParams.set('distance', document.getElementById('distanceFilter').value);
-                window.location.href = url.toString();
-            },
-            function(error) {
-                console.error('Error getting location:', error);
-                alert('Unable to get your location. Please check your browser permissions.');
-                button.innerHTML = '<i class="fas fa-location-arrow me-1"></i>Use My Location';
-                button.disabled = false;
-            }
-        );
-    }
     
     // Event listeners
-    document.getElementById('getLocationBtn').addEventListener('click', getCurrentLocation);
     document.getElementById('distanceFilter').addEventListener('change', updateMapWithFilter);
     
     // Initialize map with current data
@@ -269,7 +210,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .bindPopup(`
                 <div style="text-align: center;">
                     <h6 style="color: black; margin-bottom: 5px;"><i class="fas fa-user me-1"></i>Your Location</h6>
-                    <p style="color: black; margin: 0;">${isProfileLocation ? 'From your profile' : 'GPS location'}</p>
+                    <p style="color: black; margin: 0;">From your profile</p>
                 </div>
             `);
     }
@@ -295,7 +236,7 @@ document.addEventListener('DOMContentLoaded', function() {
             ${userLat && userLon ? `
             <div class="d-flex align-items-center mt-2">
                 <div style="background-color: #dc3545; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; display: flex; align-items: center; justify-content: center;"><i class="fas fa-user" style="color: white; font-size: 6px;"></i></div>
-                <small style="color: black;">${isProfileLocation ? 'Your Profile Location' : 'Your GPS Location'}</small>
+                <small style="color: black;">Your Profile Location</small>
             </div>
             ` : ''}
         `;
