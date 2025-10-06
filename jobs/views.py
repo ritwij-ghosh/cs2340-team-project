@@ -208,12 +208,25 @@ def map_view(request):
             'skills': job.get_skills_list()[:3],  # First 3 skills
         })
     
-    # Get distance filter parameters
+    # Get user's location from profile or URL parameters
     user_lat = request.GET.get('lat')
     user_lon = request.GET.get('lon')
     max_distance = request.GET.get('distance', '100')  # Default 100 miles
     
-    # Apply distance filtering if user location is provided
+    # If no location provided in URL, try to get from user's profile
+    if not user_lat or not user_lon:
+        try:
+            user_profile = request.user.user_profile
+            if user_profile.location:
+                from jobs.utils import geocode_location
+                profile_lat, profile_lon = geocode_location(user_profile.location)
+                if profile_lat and profile_lon:
+                    user_lat = profile_lat
+                    user_lon = profile_lon
+        except:
+            pass
+    
+    # Apply distance filtering if user location is available
     if user_lat and user_lon:
         try:
             user_lat = float(user_lat)
@@ -226,6 +239,14 @@ def map_view(request):
             # If invalid coordinates, use all jobs
             pass
     
+    # Check if user has location in profile
+    has_profile_location = False
+    try:
+        user_profile = request.user.user_profile
+        has_profile_location = bool(user_profile.location)
+    except:
+        pass
+    
     context = {
         'template_data': {'title': 'Job Map - HireBuzz'},
         'jobs_data': jobs_data,
@@ -233,6 +254,7 @@ def map_view(request):
         'user_lat': user_lat,
         'user_lon': user_lon,
         'max_distance': max_distance,
+        'has_profile_location': has_profile_location,
     }
     return render(request, 'jobs/map.html', context)
 

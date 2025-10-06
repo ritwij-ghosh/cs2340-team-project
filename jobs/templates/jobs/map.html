@@ -23,15 +23,35 @@
               </select>
             </div>
             <button id="getLocationBtn" class="btn btn-outline-light btn-sm">
-              <i class="fas fa-location-arrow me-1"></i>Use My Location
+              <i class="fas fa-location-arrow me-1"></i>Use GPS Location
             </button>
             <span class="badge bg-primary">{{ jobs_count }} jobs on map</span>
+            {% if user_lat and user_lon %}
+              <span class="badge bg-success">
+                <i class="fas fa-map-marker-alt me-1"></i>Filtering by location
+              </span>
+            {% endif %}
             <a href="{% url 'jobs:index' %}" class="btn btn-outline-light btn-sm">
               <i class="fas fa-list me-1"></i>List View
             </a>
           </div>
         </div>
         <div class="card-body p-0">
+          {% if user_lat and user_lon and not request.GET.lat %}
+            <div class="alert alert-success m-3" role="alert">
+              <i class="fas fa-map-marker-alt me-2"></i>
+              <strong>Location loaded from your profile!</strong> Jobs are automatically filtered by distance from {{ request.user.user_profile.location }}.
+            </div>
+          {% endif %}
+          {% if not user_lat and not user_lon and not has_profile_location %}
+            <div class="alert alert-info m-3" role="alert">
+              <i class="fas fa-info-circle me-2"></i>
+              <strong>Tip:</strong> Add your location to your profile to automatically filter jobs by distance, or use the "Use GPS Location" button for one-time filtering.
+              <a href="{% url 'profiles:edit' %}" class="btn btn-sm btn-outline-primary ms-2">
+                <i class="fas fa-edit me-1"></i>Edit Profile
+              </a>
+            </div>
+          {% endif %}
           <div id="map" style="height: 600px; width: 100%;"></div>
         </div>
       </div>
@@ -64,6 +84,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const userLat = {{ user_lat|default:"null" }};
     const userLon = {{ user_lon|default:"null" }};
     const maxDistance = {{ max_distance|default:"100" }};
+    
+    // Check if location is from profile or GPS
+    const isProfileLocation = !window.location.search.includes('lat=');
     
     // Create markers for each job
     let markers = [];
@@ -246,7 +269,7 @@ document.addEventListener('DOMContentLoaded', function() {
             ${userLat && userLon ? `
             <div class="d-flex align-items-center mt-2">
                 <div style="background-color: red; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px;"></div>
-                <small style="color: black;">Your Location</small>
+                <small style="color: black;">${isProfileLocation ? 'Your Profile Location' : 'Your GPS Location'}</small>
             </div>
             ` : ''}
         `;
