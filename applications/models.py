@@ -25,6 +25,13 @@ class Application(models.Model):
         on_delete=models.CASCADE,
         related_name='applications'
     )
+    job = models.ForeignKey(
+        'jobs.Job',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        help_text="Link to the actual job posting (if available)"
+    )
     job_title = models.CharField(max_length=200)
     company_name = models.CharField(max_length=200)
     status = models.CharField(

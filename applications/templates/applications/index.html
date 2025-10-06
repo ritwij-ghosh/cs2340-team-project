@@ -19,7 +19,16 @@
             <div class="card-body text-light">
               <div class="d-flex justify-content-between flex-wrap gap-3">
                 <div>
-                  <h4 class="mb-1 text-light">{{ application.job_title }}</h4>
+                  <h4 class="mb-1 text-light">
+                    {% if application.job %}
+                      <a href="{% url 'jobs:detail' application.job.pk %}" class="text-light text-decoration-none">
+                        {{ application.job_title }}
+                        <i class="fas fa-external-link-alt ms-1" style="font-size: 0.8em;"></i>
+                      </a>
+                    {% else %}
+                      {{ application.job_title }}
+                    {% endif %}
+                  </h4>
                   <p class="text-muted mb-0">{{ application.company_name }}</p>
                   <small class="text-muted">Applied {{ application.applied_on|date:"M d, Y" }} | Updated {{ application.updated_at|timesince }} ago</small>
                 </div>
