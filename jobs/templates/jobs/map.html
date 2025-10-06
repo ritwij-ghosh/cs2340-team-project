@@ -38,13 +38,13 @@
         </div>
         <div class="card-body p-0">
           {% if user_lat and user_lon and not request.GET.lat %}
-            <div class="alert alert-success m-3" role="alert">
+            <div class="alert alert-success m-3" role="alert" style="color: #0f5132;">
               <i class="fas fa-map-marker-alt me-2"></i>
               <strong>Location loaded from your profile!</strong> Jobs are automatically filtered by distance from {{ request.user.user_profile.location }}.
             </div>
           {% endif %}
           {% if not user_lat and not user_lon and not has_profile_location %}
-            <div class="alert alert-info m-3" role="alert">
+            <div class="alert alert-info m-3" role="alert" style="color: #055160;">
               <i class="fas fa-info-circle me-2"></i>
               <strong>Tip:</strong> Add your location to your profile to automatically filter jobs by distance, or use the "Use GPS Location" button for one-time filtering.
               <a href="{% url 'profiles:edit' %}" class="btn btn-sm btn-outline-primary ms-2">
