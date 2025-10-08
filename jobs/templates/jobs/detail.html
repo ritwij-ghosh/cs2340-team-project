@@ -1,5 +1,13 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block content %}
+{% if job.has_coordinates %}
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+{% endif %}
+
 <div class="container py-4">
   <div class="row">
     <div class="col-md-8">
@@ -131,7 +139,7 @@
     </div>
 
     <div class="col-md-4">
-      <div class="card">
+      <div class="card mb-3">
         <div class="card-header">
           <h5 class="mb-0">About this Role</h5>
         </div>
@@ -155,6 +163,25 @@
           </div>
         </div>
       </div>
+
+      {% if job.has_coordinates %}
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">
+            <i class="fas fa-map-marker-alt me-2"></i>Office Location
+          </h5>
+        </div>
+        <div class="card-body p-0">
+          <div id="jobLocationMap" style="height: 300px; width: 100%;"></div>
+        </div>
+        <div class="card-body">
+          <p class="mb-0 small text-muted">
+            <i class="fas fa-info-circle me-1"></i>
+            {{ job.location }}
+          </p>
+        </div>
+      </div>
+      {% endif %}
     </div>
   </div>
 
@@ -195,4 +222,26 @@
   </div>
   {% endif %}
 </div>
+
+{% if job.has_coordinates %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize map for job location
+  const jobLat = {{ job.latitude }};
+  const jobLng = {{ job.longitude }};
+
+  const map = L.map('jobLocationMap').setView([jobLat, jobLng], 13);
+
+  // Add OpenStreetMap tiles
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 19
+  }).addTo(map);
+
+  // Add marker for job location
+  const marker = L.marker([jobLat, jobLng]).addTo(map);
+  marker.bindPopup('<strong>{{ job.company }}</strong><br>{{ job.location }}').openPopup();
+});
+</script>
+{% endif %}
 {% endblock content %}
