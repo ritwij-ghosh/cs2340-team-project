@@ -31,19 +31,31 @@ def index(request):
     return render(request, 'accounts/index.html', context)
 
 def login_view(request):
+    username = ''
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            messages.success(request, 'Successfully logged in!')
-            return redirect('profiles:index')
+            # Redirect based on user type without adding success message
+            try:
+                user_profile = user.user_profile
+                if user_profile.is_job_seeker():
+                    # Job seekers go to jobs page
+                    return redirect('jobs:index')
+                elif user_profile.is_recruiter():
+                    # Recruiters go to candidate profiles
+                    return redirect('profiles:index')
+            except:
+                # If no user profile, go to profile creation
+                return redirect('profiles:create')
         else:
-            messages.error(request, 'Invalid username or password.')
-    
+            messages.error(request, 'Invalid username or password. Please check your credentials and try again.')
+
     context = {
-        'template_data': {'title': 'Login - HireBuzz'}
+        'template_data': {'title': 'Login - HireBuzz'},
+        'username': username
     }
     return render(request, 'accounts/login.html', context)
 
@@ -118,5 +130,4 @@ def register_recruiter(request):
 def logout_view(request):
     from django.contrib.auth import logout
     logout(request)
-    messages.success(request, 'Successfully logged out!')
     return redirect('home:index')
