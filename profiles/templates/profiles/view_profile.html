@@ -11,12 +11,12 @@
         <div>
           {% if user.is_authenticated and not is_owner %}
             {% if user.user_profile.is_recruiter and profile_user.user_profile.is_job_seeker %}
-              <a href="mailto:{{ profile_user.email }}?subject=Job Opportunity - {{ profile.headline }}" class="btn btn-primary me-2">
-                <i class="fas fa-envelope me-1"></i>Email Candidate
+              <a href="{% url 'communications:send_message' %}?recipient={{ profile_user.id }}" class="btn btn-primary me-2">
+                <i class="fas fa-comments me-1"></i>Message Candidate
               </a>
             {% elif user.user_profile.is_job_seeker and profile_user.user_profile.is_recruiter %}
-              <a href="mailto:{{ profile_user.email }}?subject=Interest in Your Job Postings" class="btn btn-primary me-2">
-                <i class="fas fa-envelope me-1"></i>Email Recruiter
+              <a href="{% url 'communications:send_message' %}?recipient={{ profile_user.id }}" class="btn btn-primary me-2">
+                <i class="fas fa-comments me-1"></i>Message Recruiter
               </a>
             {% endif %}
           {% endif %}

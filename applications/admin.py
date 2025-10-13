@@ -1,4 +1,7 @@
 from django.contrib import admin
+from django.http import HttpResponse
+from django.utils import timezone
+import csv
 from .models import Application
 
 
@@ -23,7 +26,7 @@ class ApplicationAdmin(admin.ModelAdmin):
         })
     )
     
-    actions = ['mark_as_review', 'mark_as_interview', 'mark_as_offer', 'mark_as_closed']
+    actions = ['mark_as_review', 'mark_as_interview', 'mark_as_offer', 'mark_as_closed', 'export_applications_csv']
     
     @admin.action(description='Mark selected applications as Review')
     def mark_as_review(self, request, queryset):
@@ -44,3 +47,30 @@ class ApplicationAdmin(admin.ModelAdmin):
     def mark_as_closed(self, request, queryset):
         updated = queryset.update(status=Application.Status.CLOSED)
         self.message_user(request, f"Marked {updated} application(s) as Closed.")
+    
+    @admin.action(description='Export selected applications to CSV')
+    def export_applications_csv(self, request, queryset):
+        """Export selected applications to CSV file."""
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="applications_export_{timezone.now().strftime("%Y%m%d_%H%M%S")}.csv"'
+        
+        writer = csv.writer(response)
+        writer.writerow([
+            'User', 'User Email', 'Job Title', 'Company Name', 'Status', 
+            'Applied On', 'Notes', 'Created At', 'Updated At'
+        ])
+        
+        for application in queryset:
+            writer.writerow([
+                application.user.username,
+                application.user.email,
+                application.job_title,
+                application.company_name,
+                application.status,
+                application.applied_on.strftime('%Y-%m-%d'),
+                application.notes,
+                application.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                application.updated_at.strftime('%Y-%m-%d %H:%M:%S')
+            ])
+        
+        return response

@@ -1,4 +1,7 @@
 from django.contrib import admin
+from django.http import HttpResponse
+from django.utils import timezone
+import csv
 from .models import Message
 
 
@@ -20,7 +23,7 @@ class MessageAdmin(admin.ModelAdmin):
         })
     )
     
-    actions = ['mark_as_read', 'mark_as_unread']
+    actions = ['mark_as_read', 'mark_as_unread', 'export_messages_csv']
     
     @admin.action(description='Mark selected messages as read')
     def mark_as_read(self, request, queryset):
@@ -37,3 +40,30 @@ class MessageAdmin(admin.ModelAdmin):
         return obj.is_read()
     is_read.boolean = True
     is_read.short_description = 'Read'
+    
+    @admin.action(description='Export selected messages to CSV')
+    def export_messages_csv(self, request, queryset):
+        """Export selected messages to CSV file."""
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="messages_export_{timezone.now().strftime("%Y%m%d_%H%M%S")}.csv"'
+        
+        writer = csv.writer(response)
+        writer.writerow([
+            'Subject', 'Sender', 'Sender Email', 'Recipient', 'Recipient Email', 
+            'Body', 'Sent At', 'Read At', 'Is Read'
+        ])
+        
+        for message in queryset:
+            writer.writerow([
+                message.subject,
+                message.sender.username,
+                message.sender.email,
+                message.recipient.username,
+                message.recipient.email,
+                message.body,
+                message.sent_at.strftime('%Y-%m-%d %H:%M:%S'),
+                message.read_at.strftime('%Y-%m-%d %H:%M:%S') if message.read_at else 'Not Read',
+                'Yes' if message.is_read() else 'No'
+            ])
+        
+        return response

@@ -101,9 +101,16 @@
                     <small class="text-light">
                       Updated {{ profile.updated_at|timesince }} ago
                     </small>
-                    <a href="{% url 'profiles:view' profile.user.id %}" class="btn btn-sm btn-outline-primary">
-                      View Profile
-                    </a>
+                    <div class="btn-group" role="group">
+                      <a href="{% url 'profiles:view' profile.user.id %}" class="btn btn-sm btn-outline-primary">
+                        View Profile
+                      </a>
+                      {% if user.is_authenticated and user.user_profile.is_recruiter %}
+                        <a href="{% url 'communications:send_message' %}?recipient={{ profile.user.id }}" class="btn btn-sm btn-primary">
+                          <i class="fas fa-comments"></i>
+                        </a>
+                      {% endif %}
+                    </div>
                   </div>
                 </div>
               </div>
