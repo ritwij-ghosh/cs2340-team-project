@@ -1,23 +1,26 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="container py-4">
-  <div class="d-flex justify-content-between align-items-center mb-4">
+  <div class="d-flex justify-content-between align-items-center mb-5">
     <div>
-      <h2 class="mb-1">Job Opportunities</h2>
-      <p class="text-light mb-0">Browse open roles and tailor searches to your stack and interests.</p>
+      <h1 class="display-5 fw-bold mb-2 text-light">
+        <i class="fas fa-briefcase me-3" style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i>
+        Job Opportunities
+      </h1>
+      <p class="text-light opacity-75 mb-0 fs-5">Discover your next career opportunity with our curated job listings</p>
     </div>
     {% if user.is_authenticated %}
-    <div class="d-flex gap-2">
+    <div class="d-flex gap-3">
       {% if user.user_profile.is_job_seeker %}
-        <a href="{% url 'jobs:map' %}" class="btn btn-outline-success">
-          <i class="fas fa-map-marked-alt me-1"></i>Job Map
+        <a href="{% url 'jobs:map' %}" class="btn btn-outline-light">
+          <i class="fas fa-map-marked-alt me-2"></i>Job Map
         </a>
       {% elif user.user_profile.is_recruiter %}
-        <a href="{% url 'jobs:my_jobs' %}" class="btn btn-outline-primary">
-          <i class="fas fa-briefcase me-1"></i>My Jobs
+        <a href="{% url 'jobs:my_jobs' %}" class="btn btn-outline-light">
+          <i class="fas fa-briefcase me-2"></i>My Jobs
         </a>
-        <a href="{% url 'jobs:post_job' %}" class="btn btn-primary">
-          <i class="fas fa-plus me-1"></i>Post a Job
+        <a href="{% url 'jobs:post_job' %}" class="btn btn-success pulse">
+          <i class="fas fa-plus me-2"></i>Post a Job
         </a>
       {% endif %}
     </div>
@@ -25,13 +28,13 @@
   </div>
 
   <!-- Search and Filter Section -->
-  <div class="card mb-4">
-    <div class="card-header">
-      <h5 class="mb-0">
-        <i class="fas fa-filter me-2"></i>Search & Filter Jobs
+  <div class="card mb-5" style="background: linear-gradient(135deg, rgba(30, 58, 138, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%); backdrop-filter: blur(10px);">
+    <div class="card-header" style="background: linear-gradient(135deg, #1f2937 0%, #374151 100%); border-bottom: none;">
+      <h5 class="mb-0 text-light fw-bold">
+        <i class="fas fa-search me-2" style="color: #3b82f6;"></i>Search & Filter Jobs
       </h5>
     </div>
-    <div class="card-body">
+    <div class="card-body p-4">
       <form method="get" id="jobSearchForm">
         <!-- Primary Search Row -->
         <div class="row g-3 mb-3">

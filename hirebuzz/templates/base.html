@@ -9,9 +9,236 @@
     <!-- Bootstrap + Fonts -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Theme CSS -->
     <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+    
+    <!-- Custom CSS for enhanced UI -->
+    <style>
+      :root {
+        --primary-gradient: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        --secondary-gradient: linear-gradient(135deg, #059669 0%, #10b981 100%);
+        --success-gradient: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+        --warning-gradient: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+        --dark-gradient: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+        --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        --card-shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
+        --border-radius: 12px;
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        
+        /* Professional hiring colors */
+        --corporate-blue: #1e40af;
+        --trust-blue: #3b82f6;
+        --success-green: #059669;
+        --growth-teal: #0d9488;
+        --energy-orange: #ea580c;
+        --professional-gray: #374151;
+        --light-gray: #f8fafc;
+        --accent-purple: #7c3aed;
+      }
+      
+      body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #0ea5e9 100%);
+        min-height: 100vh;
+      }
+      
+      .navbar-brand {
+        font-weight: 700;
+        font-size: 1.5rem;
+        transition: var(--transition);
+      }
+      
+      .navbar-brand:hover {
+        transform: scale(1.05);
+      }
+      
+      .nav-link {
+        font-weight: 500;
+        transition: var(--transition);
+        border-radius: 8px;
+        margin: 0 4px;
+        padding: 8px 16px !important;
+      }
+      
+      .nav-link:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateY(-1px);
+      }
+      
+      .btn {
+        border-radius: var(--border-radius);
+        font-weight: 500;
+        transition: var(--transition);
+        border: none;
+        padding: 10px 20px;
+      }
+      
+      .btn-primary {
+        background: var(--primary-gradient);
+        box-shadow: 0 4px 15px rgba(30, 58, 138, 0.4);
+        border: none;
+      }
+      
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(30, 58, 138, 0.6);
+        background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+      }
+      
+      .btn-success {
+        background: var(--secondary-gradient);
+        box-shadow: 0 4px 15px rgba(5, 150, 105, 0.4);
+        border: none;
+      }
+      
+      .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(5, 150, 105, 0.6);
+        background: linear-gradient(135deg, #047857 0%, #059669 100%);
+      }
+      
+      .btn-info {
+        background: var(--success-gradient);
+        box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4);
+        border: none;
+      }
+      
+      .btn-info:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(14, 165, 233, 0.6);
+        background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);
+      }
+      
+      .btn-warning {
+        background: var(--warning-gradient);
+        box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+        border: none;
+      }
+      
+      .btn-warning:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(245, 158, 11, 0.6);
+        background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+      }
+      
+      .card {
+        border-radius: var(--border-radius);
+        border: none;
+        box-shadow: var(--card-shadow);
+        transition: var(--transition);
+        overflow: hidden;
+      }
+      
+      .card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--card-shadow-hover);
+      }
+      
+      .card-header {
+        background: var(--dark-gradient);
+        border-bottom: none;
+        font-weight: 600;
+      }
+      
+      .form-control, .form-select {
+        border-radius: var(--border-radius);
+        border: 2px solid #e9ecef;
+        transition: var(--transition);
+        padding: 12px 16px;
+      }
+      
+      .form-control:focus, .form-select:focus {
+        border-color: var(--trust-blue);
+        box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+      }
+      
+      .badge {
+        border-radius: 20px;
+        font-weight: 500;
+        padding: 6px 12px;
+      }
+      
+      .alert {
+        border-radius: var(--border-radius);
+        border: none;
+        box-shadow: var(--card-shadow);
+      }
+      
+      .dropdown-menu {
+        border-radius: var(--border-radius);
+        border: none;
+        box-shadow: var(--card-shadow);
+        padding: 8px;
+      }
+      
+      .dropdown-item {
+        border-radius: 8px;
+        transition: var(--transition);
+        margin: 2px 0;
+      }
+      
+      .dropdown-item:hover {
+        background: rgba(59, 130, 246, 0.1);
+        transform: translateX(4px);
+      }
+      
+      .modal-content {
+        border-radius: var(--border-radius);
+        border: none;
+        box-shadow: var(--card-shadow-hover);
+      }
+      
+      .modal-header {
+        background: var(--dark-gradient);
+        border-bottom: none;
+      }
+      
+      .navbar-toggler {
+        border: none;
+        padding: 4px 8px;
+      }
+      
+      .navbar-toggler:focus {
+        box-shadow: none;
+      }
+      
+      /* Loading animation */
+      .loading {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: #fff;
+        animation: spin 1s ease-in-out infinite;
+      }
+      
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      
+      /* Fade in animation */
+      .fade-in {
+        animation: fadeIn 0.6s ease-in-out;
+      }
+      
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      
+      /* Pulse animation for important elements */
+      .pulse {
+        animation: pulse 2s infinite;
+      }
+      
+      @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+      }
+    </style>
   </head>
   <body class="hb-body">
     <!-- Header -->
@@ -85,10 +312,135 @@
     </nav>
     <!-- /Header -->
 
-    <main class="hb-main">
+    <main class="hb-main fade-in">
       {% block content %}{% endblock content %}
     </main>
 
+    <!-- Footer -->
+    <footer class="text-center py-4 mt-5" style="background: rgba(0,0,0,0.1); backdrop-filter: blur(10px);">
+      <div class="container">
+        <p class="text-light mb-0">
+          <i class="fas fa-heart text-danger me-1"></i>
+          Made with love for connecting talent with opportunities
+        </p>
+        <small class="text-light opacity-75">© 2025 HireBuzz. All rights reserved.</small>
+      </div>
+    </footer>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    
+    <!-- Enhanced JavaScript -->
+    <script>
+      // Add loading states to buttons
+      document.addEventListener('DOMContentLoaded', function() {
+        // Add loading state to form submissions
+        const forms = document.querySelectorAll('form');
+        forms.forEach(form => {
+          form.addEventListener('submit', function() {
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+              const originalText = submitBtn.innerHTML;
+              submitBtn.innerHTML = '<span class="loading me-2"></span>Processing...';
+              submitBtn.disabled = true;
+              
+              // Re-enable after 5 seconds as fallback
+              setTimeout(() => {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+              }, 5000);
+            }
+          });
+        });
+        
+        // Add hover effects to cards
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(card => {
+          card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px) scale(1.02)';
+          });
+          
+          card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+          });
+        });
+        
+        // Add smooth scrolling to anchor links
+        const anchorLinks = document.querySelectorAll('a[href^="#"]');
+        anchorLinks.forEach(link => {
+          link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+              target.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+              });
+            }
+          });
+        });
+        
+        // Add fade-in animation to elements as they come into view
+        const observerOptions = {
+          threshold: 0.1,
+          rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver(function(entries) {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.style.opacity = '1';
+              entry.target.style.transform = 'translateY(0)';
+            }
+          });
+        }, observerOptions);
+        
+        // Observe all cards and important elements
+        const animatedElements = document.querySelectorAll('.card, .alert, .btn-group');
+        animatedElements.forEach(el => {
+          el.style.opacity = '0';
+          el.style.transform = 'translateY(20px)';
+          el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+          observer.observe(el);
+        });
+        
+        // Add pulse effect to important buttons
+        const importantButtons = document.querySelectorAll('.btn-primary, .btn-success');
+        importantButtons.forEach(btn => {
+          if (btn.textContent.includes('Apply') || btn.textContent.includes('Send') || btn.textContent.includes('Create')) {
+            btn.classList.add('pulse');
+          }
+        });
+      });
+      
+      // Add toast notifications for better UX
+      function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `alert alert-${type} position-fixed`;
+        toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        toast.innerHTML = `
+          <div class="d-flex align-items-center">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
+            ${message}
+            <button type="button" class="btn-close ms-auto" onclick="this.parentElement.parentElement.remove()"></button>
+          </div>
+        `;
+        
+        document.body.appendChild(toast);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+          if (toast.parentElement) {
+            toast.remove();
+          }
+        }, 5000);
+      }
+      
+      // Show toast for Django messages
+      {% if messages %}
+        {% for message in messages %}
+          showToast('{{ message|escapejs }}', '{{ message.tags }}');
+        {% endfor %}
+      {% endif %}
+    </script>
   </body>
 </html>

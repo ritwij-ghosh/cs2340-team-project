@@ -5,31 +5,11 @@ from django.contrib.auth.models import User
 from .models import Profile
 from .forms import ProfileForm, UserForm
 from django.db.models import Q
-from accounts.models import UserProfile
 
 
 def index(request):
-    """Display all public profiles for browsing - only job seekers can be viewed by recruiters."""
-    # Only show job seeker profiles to recruiters, and only if user is authenticated
-    if not request.user.is_authenticated:
-        messages.warning(request, 'Please log in to browse profiles.')
-        return redirect('accounts:login')
-    
-    # Check if current user is a recruiter
-    try:
-        user_profile = request.user.user_profile
-        if not user_profile.is_recruiter():
-            messages.warning(request, 'Only recruiters can browse candidate profiles.')
-            return redirect('jobs:index')
-    except UserProfile.DoesNotExist:
-        messages.warning(request, 'Please complete your profile setup first.')
-        return redirect('profiles:create')
-    
-    # Only show job seeker profiles
-    profiles = Profile.objects.filter(
-        is_public=True,
-        user__user_profile__user_type='job_seeker'
-    )
+    """Display all public profiles for browsing."""
+    profiles = Profile.objects.filter(is_public=True)
 
     # Filtering for recruiter search
     skills_query = (request.GET.get('skills') or '').strip()
@@ -62,6 +42,82 @@ def index(request):
             | Q(other_url__icontains=projects_query)
         )
 
+    # US Cities and States for location dropdown
+    location_choices = [
+        ('', 'All Locations'),
+        ('Remote', 'Remote'),
+        ('Alabama', 'Alabama'),
+        ('Alaska', 'Alaska'),
+        ('Arizona', 'Arizona'),
+        ('Arkansas', 'Arkansas'),
+        ('California', 'California'),
+        ('Colorado', 'Colorado'),
+        ('Connecticut', 'Connecticut'),
+        ('Delaware', 'Delaware'),
+        ('Florida', 'Florida'),
+        ('Georgia', 'Georgia'),
+        ('Hawaii', 'Hawaii'),
+        ('Idaho', 'Idaho'),
+        ('Illinois', 'Illinois'),
+        ('Indiana', 'Indiana'),
+        ('Iowa', 'Iowa'),
+        ('Kansas', 'Kansas'),
+        ('Kentucky', 'Kentucky'),
+        ('Louisiana', 'Louisiana'),
+        ('Maine', 'Maine'),
+        ('Maryland', 'Maryland'),
+        ('Massachusetts', 'Massachusetts'),
+        ('Michigan', 'Michigan'),
+        ('Minnesota', 'Minnesota'),
+        ('Mississippi', 'Mississippi'),
+        ('Missouri', 'Missouri'),
+        ('Montana', 'Montana'),
+        ('Nebraska', 'Nebraska'),
+        ('Nevada', 'Nevada'),
+        ('New Hampshire', 'New Hampshire'),
+        ('New Jersey', 'New Jersey'),
+        ('New Mexico', 'New Mexico'),
+        ('New York', 'New York'),
+        ('North Carolina', 'North Carolina'),
+        ('North Dakota', 'North Dakota'),
+        ('Ohio', 'Ohio'),
+        ('Oklahoma', 'Oklahoma'),
+        ('Oregon', 'Oregon'),
+        ('Pennsylvania', 'Pennsylvania'),
+        ('Rhode Island', 'Rhode Island'),
+        ('South Carolina', 'South Carolina'),
+        ('South Dakota', 'South Dakota'),
+        ('Tennessee', 'Tennessee'),
+        ('Texas', 'Texas'),
+        ('Utah', 'Utah'),
+        ('Vermont', 'Vermont'),
+        ('Virginia', 'Virginia'),
+        ('Washington', 'Washington'),
+        ('West Virginia', 'West Virginia'),
+        ('Wisconsin', 'Wisconsin'),
+        ('Wyoming', 'Wyoming'),
+        ('Washington DC', 'Washington DC'),
+        ('Atlanta, GA', 'Atlanta, GA'),
+        ('Austin, TX', 'Austin, TX'),
+        ('Boston, MA', 'Boston, MA'),
+        ('Chicago, IL', 'Chicago, IL'),
+        ('Dallas, TX', 'Dallas, TX'),
+        ('Denver, CO', 'Denver, CO'),
+        ('Detroit, MI', 'Detroit, MI'),
+        ('Houston, TX', 'Houston, TX'),
+        ('Los Angeles, CA', 'Los Angeles, CA'),
+        ('Miami, FL', 'Miami, FL'),
+        ('New York, NY', 'New York, NY'),
+        ('Philadelphia, PA', 'Philadelphia, PA'),
+        ('Phoenix, AZ', 'Phoenix, AZ'),
+        ('San Antonio, TX', 'San Antonio, TX'),
+        ('San Diego, CA', 'San Diego, CA'),
+        ('San Francisco, CA', 'San Francisco, CA'),
+        ('San Jose, CA', 'San Jose, CA'),
+        ('Seattle, WA', 'Seattle, WA'),
+        ('Tampa, FL', 'Tampa, FL'),
+    ]
+
     context = {
         'profiles': profiles,
         'filters': {
@@ -69,7 +125,8 @@ def index(request):
             'location': location_query,
             'projects': projects_query,
         },
-        'template_data': {'title': 'Candidate Profiles - HireBuzz'}
+        'location_choices': location_choices,
+        'template_data': {'title': 'Profiles - HireBuzz'}
     }
     return render(request, 'profiles/index.html', context)
 
@@ -159,43 +216,15 @@ def edit_user_info(request):
 
 
 def view_profile(request, user_id):
-    """View a specific user's public profile - with privacy controls."""
-    if not request.user.is_authenticated:
-        messages.warning(request, 'Please log in to view profiles.')
-        return redirect('accounts:login')
-    
+    """View a specific user's public profile."""
     user = get_object_or_404(User, id=user_id)
     try:
         profile = user.profile
-        user_profile = user.user_profile
-    except (Profile.DoesNotExist, UserProfile.DoesNotExist):
+    except Profile.DoesNotExist:
         messages.error(request, 'This user does not have a public profile.')
         return redirect('profiles:index')
 
-    is_owner = request.user == user
-    
-    # Privacy controls: Only recruiters can view job seeker profiles
-    try:
-        current_user_profile = request.user.user_profile
-        if not is_owner:
-            if current_user_profile.is_recruiter() and user_profile.is_job_seeker():
-                # Recruiter viewing job seeker - allowed
-                pass
-            elif current_user_profile.is_job_seeker() and user_profile.is_recruiter():
-                # Job seeker trying to view recruiter - not allowed
-                messages.warning(request, 'Job seekers cannot view recruiter profiles.')
-                return redirect('jobs:index')
-            elif current_user_profile.is_job_seeker() and user_profile.is_job_seeker():
-                # Job seeker trying to view another job seeker - not allowed
-                messages.warning(request, 'Job seekers cannot view other job seeker profiles.')
-                return redirect('jobs:index')
-            else:
-                messages.warning(request, 'You do not have permission to view this profile.')
-                return redirect('profiles:index')
-    except UserProfile.DoesNotExist:
-        messages.warning(request, 'Please complete your profile setup first.')
-        return redirect('profiles:create')
-    
+    is_owner = request.user.is_authenticated and request.user == user
     if not profile.is_public and not is_owner and not request.user.is_staff:
         messages.warning(request, 'This profile is currently set to private.')
         return redirect('profiles:index')

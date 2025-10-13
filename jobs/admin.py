@@ -1,4 +1,7 @@
 from django.contrib import admin
+from django.http import HttpResponse
+from django.utils import timezone
+import csv
 from .models import Job
 
 
@@ -34,7 +37,7 @@ class JobAdmin(admin.ModelAdmin):
         })
     )
     
-    actions = ['activate_jobs', 'pause_jobs', 'close_jobs']
+    actions = ['activate_jobs', 'pause_jobs', 'close_jobs', 'export_jobs_csv']
     
     @admin.action(description='Activate selected jobs')
     def activate_jobs(self, request, queryset):
@@ -50,5 +53,38 @@ class JobAdmin(admin.ModelAdmin):
     def close_jobs(self, request, queryset):
         updated = queryset.update(status='closed')
         self.message_user(request, f"Closed {updated} job(s).")
+    
+    @admin.action(description='Export selected jobs to CSV')
+    def export_jobs_csv(self, request, queryset):
+        """Export selected jobs to CSV file."""
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="jobs_export_{timezone.now().strftime("%Y%m%d_%H%M%S")}.csv"'
+        
+        writer = csv.writer(response)
+        writer.writerow([
+            'Title', 'Company', 'Location', 'Employment Type', 'Experience Level', 
+            'Work Type', 'Status', 'Recruiter', 'Salary Min', 'Salary Max', 
+            'Visa Sponsorship', 'Application Deadline', 'Created At', 'Updated At'
+        ])
+        
+        for job in queryset:
+            writer.writerow([
+                job.title,
+                job.company,
+                job.location,
+                job.employment_type,
+                job.experience_level,
+                job.work_type,
+                job.status,
+                job.recruiter.username if job.recruiter else 'N/A',
+                job.salary_min,
+                job.salary_max,
+                job.visa_sponsorship,
+                job.application_deadline.strftime('%Y-%m-%d') if job.application_deadline else 'N/A',
+                job.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                job.updated_at.strftime('%Y-%m-%d %H:%M:%S')
+            ])
+        
+        return response
 
 

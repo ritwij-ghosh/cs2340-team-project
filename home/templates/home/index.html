@@ -3,18 +3,28 @@
 <div class="container">
   <!-- Hero Section -->
   <div class="row mb-5">
-    <div class="col-lg-8 mx-auto text-center">
-      <h1 class="display-4 mb-4">Welcome to <span class="hb-accent">HireBuzz</span></h1>
-      <p class="lead mb-4">Connecting early-career job seekers with recruiters through an innovative job board platform</p>
-      <div class="d-flex justify-content-center gap-3">
-        {% if not user.is_authenticated %}
-          <a href="{% url 'accounts:register' %}" class="btn btn-success btn-lg">
-            <i class="fas fa-user-plus me-2"></i>Get Started
-          </a>
-          <a href="{% url 'accounts:login' %}" class="btn btn-outline-success btn-lg">
-            <i class="fas fa-sign-in-alt me-2"></i>Login
-          </a>
-        {% endif %}
+    <div class="col-lg-10 mx-auto text-center">
+      <div class="hero-section" style="background: linear-gradient(135deg, rgba(30, 58, 138, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%); border-radius: 20px; padding: 4rem 2rem; margin: 2rem 0;">
+        <h1 class="display-3 fw-bold mb-4 text-light">
+          Welcome to <span class="text-gradient" style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">HireBuzz</span>
+        </h1>
+        <p class="lead mb-4 text-light opacity-90" style="font-size: 1.25rem;">
+          Connecting talented professionals with amazing opportunities through an innovative job board platform
+        </p>
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+          {% if not user.is_authenticated %}
+            <a href="{% url 'accounts:register' %}" class="btn btn-success btn-lg pulse">
+              <i class="fas fa-rocket me-2"></i>Get Started
+            </a>
+            <a href="{% url 'accounts:login' %}" class="btn btn-outline-light btn-lg">
+              <i class="fas fa-sign-in-alt me-2"></i>Login
+            </a>
+          {% else %}
+            <div class="alert alert-success d-inline-block mb-0">
+              <i class="fas fa-check-circle me-2"></i>Welcome back, {{ user.get_full_name|default:user.username }}!
+            </div>
+          {% endif %}
+        </div>
       </div>
     </div>
   </div>
@@ -37,25 +47,62 @@
   <!-- Features Section -->
   <div class="row mb-5">
     <div class="col-12">
-      <h2 class="text-center mb-5">Platform Features</h2>
+      <h2 class="text-center mb-5 text-light fw-bold">Platform Features</h2>
     </div>
     
     <!-- Job Seekers Features -->
     <div class="col-lg-6 mb-4">
-      <div class="card h-100 bg-dark border-secondary">
+      <div class="card h-100 bg-dark border-secondary feature-card" style="background: linear-gradient(135deg, rgba(30, 58, 138, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%) !important;">
         <div class="card-body text-light">
-          <div class="d-flex align-items-center mb-3">
-            <i class="fas fa-user-tie fa-2x hb-accent me-3"></i>
-            <h4 class="mb-0">For Job Seekers</h4>
+          <div class="d-flex align-items-center mb-4">
+            <div class="feature-icon me-3" style="width: 60px; height: 60px; background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+              <i class="fas fa-user-tie fa-2x text-white"></i>
+            </div>
+            <h4 class="mb-0 fw-bold">For Job Seekers</h4>
           </div>
           <ul class="list-unstyled">
-            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Create comprehensive professional profiles</li>
-            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Browse jobs with advanced search and filters</li>
-            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>View jobs on an interactive map by location</li>
-            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>One-click apply with personalized notes</li>
-            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Track application status through the hiring pipeline</li>
-            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Communicate directly with recruiters</li>
-            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Privacy controls for profile visibility</li>
+            <li class="mb-3 d-flex align-items-center">
+              <div class="check-icon me-3" style="width: 24px; height: 24px; background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-check text-white" style="font-size: 12px;"></i>
+              </div>
+              <span>Create comprehensive professional profiles</span>
+            </li>
+            <li class="mb-3 d-flex align-items-center">
+              <div class="check-icon me-3" style="width: 24px; height: 24px; background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-check text-white" style="font-size: 12px;"></i>
+              </div>
+              <span>Browse jobs with advanced search and filters</span>
+            </li>
+            <li class="mb-3 d-flex align-items-center">
+              <div class="check-icon me-3" style="width: 24px; height: 24px; background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-check text-white" style="font-size: 12px;"></i>
+              </div>
+              <span>View jobs on an interactive map by location</span>
+            </li>
+            <li class="mb-3 d-flex align-items-center">
+              <div class="check-icon me-3" style="width: 24px; height: 24px; background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-check text-white" style="font-size: 12px;"></i>
+              </div>
+              <span>One-click apply with personalized notes</span>
+            </li>
+            <li class="mb-3 d-flex align-items-center">
+              <div class="check-icon me-3" style="width: 24px; height: 24px; background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-check text-white" style="font-size: 12px;"></i>
+              </div>
+              <span>Track application status through the hiring pipeline</span>
+            </li>
+            <li class="mb-3 d-flex align-items-center">
+              <div class="check-icon me-3" style="width: 24px; height: 24px; background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-check text-white" style="font-size: 12px;"></i>
+              </div>
+              <span>Communicate directly with recruiters</span>
+            </li>
+            <li class="mb-3 d-flex align-items-center">
+              <div class="check-icon me-3" style="width: 24px; height: 24px; background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-check text-white" style="font-size: 12px;"></i>
+              </div>
+              <span>Privacy controls for profile visibility</span>
+            </li>
           </ul>
         </div>
       </div>
@@ -63,20 +110,57 @@
 
     <!-- Recruiters Features -->
     <div class="col-lg-6 mb-4">
-      <div class="card h-100 bg-dark border-success">
+      <div class="card h-100 bg-dark border-secondary feature-card" style="background: linear-gradient(135deg, rgba(5, 150, 105, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%) !important;">
         <div class="card-body text-light">
-          <div class="d-flex align-items-center mb-3">
-            <i class="fas fa-briefcase fa-2x text-success me-3"></i>
-            <h4 class="mb-0">For Recruiters</h4>
+          <div class="d-flex align-items-center mb-4">
+            <div class="feature-icon me-3" style="width: 60px; height: 60px; background: linear-gradient(135deg, #059669 0%, #10b981 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+              <i class="fas fa-briefcase fa-2x text-white"></i>
+            </div>
+            <h4 class="mb-0 fw-bold">For Recruiters</h4>
           </div>
           <ul class="list-unstyled">
-            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Post detailed job openings with requirements</li>
-            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Browse and search candidate profiles</li>
-            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Manage job postings and applications</li>
-            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Receive applications with personalized notes</li>
-            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Communicate directly with job seekers</li>
-            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Filter candidates by skills, location, and experience</li>
-            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Track application progress and status</li>
+            <li class="mb-3 d-flex align-items-center">
+              <div class="check-icon me-3" style="width: 24px; height: 24px; background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-check text-white" style="font-size: 12px;"></i>
+              </div>
+              <span>Post detailed job openings with requirements</span>
+            </li>
+            <li class="mb-3 d-flex align-items-center">
+              <div class="check-icon me-3" style="width: 24px; height: 24px; background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-check text-white" style="font-size: 12px;"></i>
+              </div>
+              <span>Browse and search candidate profiles</span>
+            </li>
+            <li class="mb-3 d-flex align-items-center">
+              <div class="check-icon me-3" style="width: 24px; height: 24px; background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-check text-white" style="font-size: 12px;"></i>
+              </div>
+              <span>Manage job postings and applications</span>
+            </li>
+            <li class="mb-3 d-flex align-items-center">
+              <div class="check-icon me-3" style="width: 24px; height: 24px; background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-check text-white" style="font-size: 12px;"></i>
+              </div>
+              <span>Receive applications with personalized notes</span>
+            </li>
+            <li class="mb-3 d-flex align-items-center">
+              <div class="check-icon me-3" style="width: 24px; height: 24px; background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-check text-white" style="font-size: 12px;"></i>
+              </div>
+              <span>Communicate directly with job seekers</span>
+            </li>
+            <li class="mb-3 d-flex align-items-center">
+              <div class="check-icon me-3" style="width: 24px; height: 24px; background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-check text-white" style="font-size: 12px;"></i>
+              </div>
+              <span>Filter candidates by skills, location, and experience</span>
+            </li>
+            <li class="mb-3 d-flex align-items-center">
+              <div class="check-icon me-3" style="width: 24px; height: 24px; background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-check text-white" style="font-size: 12px;"></i>
+              </div>
+              <span>Track application progress and status</span>
+            </li>
           </ul>
         </div>
       </div>
@@ -86,38 +170,44 @@
   <!-- How It Works -->
   <div class="row mb-5">
     <div class="col-12">
-      <h2 class="text-center mb-5">How It Works</h2>
+      <h2 class="text-center mb-5 text-light fw-bold">How It Works</h2>
     </div>
     <div class="col-md-4 mb-4">
-      <div class="card bg-dark border-secondary text-center h-100">
+      <div class="card bg-dark border-secondary text-center h-100 step-card" style="background: linear-gradient(135deg, rgba(30, 58, 138, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%) !important;">
         <div class="card-body text-light">
-          <div class="mb-3">
-            <i class="fas fa-user-plus fa-3x hb-accent"></i>
+          <div class="mb-4">
+            <div class="step-number" style="width: 80px; height: 80px; background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+              <i class="fas fa-user-plus fa-2x text-white"></i>
+            </div>
           </div>
-          <h4 class="hb-accent">1. Sign Up</h4>
-          <p>Create your account as either a job seeker or recruiter. Choose your path and start building your presence.</p>
+          <h4 class="fw-bold mb-3" style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">1. Sign Up</h4>
+          <p class="opacity-90">Create your account as either a job seeker or recruiter. Choose your path and start building your presence.</p>
         </div>
       </div>
     </div>
     <div class="col-md-4 mb-4">
-      <div class="card bg-dark border-secondary text-center h-100">
+      <div class="card bg-dark border-secondary text-center h-100 step-card" style="background: linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, rgba(6, 182, 212, 0.1) 100%) !important;">
         <div class="card-body text-light">
-          <div class="mb-3">
-            <i class="fas fa-edit fa-3x hb-accent"></i>
+          <div class="mb-4">
+            <div class="step-number" style="width: 80px; height: 80px; background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+              <i class="fas fa-edit fa-2x text-white"></i>
+            </div>
           </div>
-          <h4 class="hb-accent">2. Build Your Profile</h4>
-          <p>Job seekers create detailed profiles. Recruiters post comprehensive job listings with requirements and benefits.</p>
+          <h4 class="fw-bold mb-3" style="background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">2. Build Your Profile</h4>
+          <p class="opacity-90">Job seekers create detailed profiles. Recruiters post comprehensive job listings with requirements and benefits.</p>
         </div>
       </div>
     </div>
     <div class="col-md-4 mb-4">
-      <div class="card bg-dark border-secondary text-center h-100">
+      <div class="card bg-dark border-secondary text-center h-100 step-card" style="background: linear-gradient(135deg, rgba(5, 150, 105, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%) !important;">
         <div class="card-body text-light">
-          <div class="mb-3">
-            <i class="fas fa-handshake fa-3x text-success"></i>
+          <div class="mb-4">
+            <div class="step-number" style="width: 80px; height: 80px; background: linear-gradient(135deg, #059669 0%, #10b981 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+              <i class="fas fa-handshake fa-2x text-white"></i>
+            </div>
           </div>
-          <h4 class="text-success">3. Connect & Apply</h4>
-          <p>Find opportunities, apply with personalized notes, communicate directly, and track your progress through the hiring process.</p>
+          <h4 class="fw-bold mb-3" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">3. Connect & Apply</h4>
+          <p class="opacity-90">Find opportunities, apply with personalized notes, communicate directly, and track your progress through the hiring process.</p>
         </div>
       </div>
     </div>
