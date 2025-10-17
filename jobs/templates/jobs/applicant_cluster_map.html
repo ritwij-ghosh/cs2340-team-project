@@ -1,0 +1,247 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid mt-3">
+  <div class="row">
+    <div class="col-12">
+      <div class="card bg-dark border-secondary">
+        <div class="card-header text-light d-flex justify-content-between align-items-center">
+          <h3 class="mb-0">
+            <i class="fas fa-users me-2"></i>Applicant Clusters by Location
+          </h3>
+          <div class="d-flex align-items-center gap-3">
+            <span class="badge bg-primary">{{ total_applicants }} total applicants</span>
+            <span class="badge bg-success">{{ unique_locations }} unique locations</span>
+            <a href="{% url 'jobs:index' %}" class="btn btn-outline-light btn-sm">
+              <i class="fas fa-list me-1"></i>Back to Jobs
+            </a>
+          </div>
+        </div>
+        <div class="card-body p-0">
+          <div class="alert alert-info m-3" role="alert" style="color: #055160;">
+            <i class="fas fa-info-circle me-2"></i>
+            <strong>Recruiter View:</strong> This map shows clusters of job seekers by location. 
+            Larger circles indicate more applicants in that area. Click on clusters to see individual applicants.
+          </div>
+          <div id="map" style="height: 600px; width: 100%;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
+      crossorigin=""/>
+
+<!-- Leaflet JavaScript -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize the map centered on the US
+    const map = L.map('map').setView([39.8283, -98.5795], 4);
+    
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+    
+    // Applicant data from Django
+    const applicantsData = {{ applicants_data|safe }};
+    
+    // Create cluster markers for each location
+    let markers = [];
+    
+    // Function to get circle size based on applicant count
+    function getCircleSize(count) {
+        if (count === 1) return 8;
+        if (count <= 3) return 12;
+        if (count <= 5) return 16;
+        if (count <= 10) return 20;
+        if (count <= 20) return 25;
+        return 30;
+    }
+    
+    // Function to get circle color based on applicant count
+    function getCircleColor(count) {
+        if (count === 1) return '#28a745'; // Green for single applicants
+        if (count <= 3) return '#17a2b8'; // Cyan for small clusters
+        if (count <= 5) return '#ffc107'; // Yellow for medium clusters
+        if (count <= 10) return '#fd7e14'; // Orange for large clusters
+        return '#dc3545'; // Red for very large clusters
+    }
+    
+    // Function to create cluster markers
+    function createClusterMarkers() {
+        // Clear existing markers
+        markers.forEach(marker => map.removeLayer(marker));
+        markers = [];
+        
+        applicantsData.forEach(function(locationData) {
+            const count = locationData.count;
+            const size = getCircleSize(count);
+            const color = getCircleColor(count);
+            
+            // Create custom icon for clusters
+            const clusterIcon = L.divIcon({
+                className: 'cluster-div-icon',
+                html: `
+                    <div style="
+                        background-color: ${color}; 
+                        width: ${size}px; 
+                        height: ${size}px; 
+                        border-radius: 50%; 
+                        border: 3px solid white; 
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-weight: bold;
+                        color: white;
+                        font-size: ${size > 20 ? '12px' : '10px'};
+                    ">${count}</div>
+                `,
+                iconSize: [size, size],
+                iconAnchor: [size/2, size/2]
+            });
+            
+            // Create popup content with applicant details
+            let popupContent = `
+                <div class="cluster-popup">
+                    <h6 class="fw-bold mb-2" style="color: black;">${locationData.location}</h6>
+                    <p class="mb-2" style="color: black;"><strong>${count} applicant${count > 1 ? 's' : ''}</strong></p>
+                    <div class="applicants-list" style="max-height: 300px; overflow-y: auto;">
+            `;
+            
+            locationData.applicants.forEach(function(applicant) {
+                popupContent += `
+                    <div class="applicant-item mb-2 p-2" style="border: 1px solid #dee2e6; border-radius: 5px; background-color: #f8f9fa;">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="mb-1" style="color: black; font-size: 14px;">${applicant.name}</h6>
+                                <p class="mb-1" style="color: #6c757d; font-size: 12px;">${applicant.headline}</p>
+                                ${applicant.skills.length > 0 ? `<p class="mb-1" style="color: #495057; font-size: 11px;"><strong>Skills:</strong> ${applicant.skills.join(', ')}</p>` : ''}
+                            </div>
+                            <a href="${applicant.profile_url}" class="btn btn-primary btn-sm" style="font-size: 10px;">View Profile</a>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            popupContent += `
+                    </div>
+                </div>
+            `;
+            
+            // Create marker
+            const marker = L.marker([locationData.latitude, locationData.longitude], { icon: clusterIcon })
+                .addTo(map)
+                .bindPopup(popupContent, {
+                    maxWidth: 400,
+                    maxHeight: 400
+                });
+            
+            markers.push(marker);
+        });
+        
+        // Fit map to show all markers
+        if (markers.length > 0) {
+            const group = new L.featureGroup(markers);
+            map.fitBounds(group.getBounds().pad(0.1));
+        }
+    }
+    
+    // Initialize map with clusters
+    createClusterMarkers();
+    
+    // Add legend
+    const legend = L.control({position: 'bottomright'});
+    legend.onAdd = function (map) {
+        const div = L.DomUtil.create('div', 'info legend bg-light p-3 rounded');
+        div.innerHTML = `
+            <h6 class="mb-2" style="color: black;">Cluster Size Legend</h6>
+            <div class="d-flex align-items-center mb-1">
+                <div style="background-color: #28a745; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px;"></div>
+                <small style="color: black;">1 applicant</small>
+            </div>
+            <div class="d-flex align-items-center mb-1">
+                <div style="background-color: #17a2b8; width: 16px; height: 16px; border-radius: 50%; margin-right: 8px;"></div>
+                <small style="color: black;">2-3 applicants</small>
+            </div>
+            <div class="d-flex align-items-center mb-1">
+                <div style="background-color: #ffc107; width: 20px; height: 20px; border-radius: 50%; margin-right: 8px;"></div>
+                <small style="color: black;">4-5 applicants</small>
+            </div>
+            <div class="d-flex align-items-center mb-1">
+                <div style="background-color: #fd7e14; width: 24px; height: 24px; border-radius: 50%; margin-right: 8px;"></div>
+                <small style="color: black;">6-10 applicants</small>
+            </div>
+            <div class="d-flex align-items-center mb-1">
+                <div style="background-color: #dc3545; width: 28px; height: 28px; border-radius: 50%; margin-right: 8px;"></div>
+                <small style="color: black;">10+ applicants</small>
+            </div>
+            <hr class="my-2">
+            <small style="color: #6c757d;">Click on clusters to view individual applicants</small>
+        `;
+        return div;
+    };
+    legend.addTo(map);
+});
+</script>
+
+<style>
+.cluster-div-icon {
+    background: none !important;
+    border: none !important;
+}
+
+.cluster-popup {
+    min-width: 300px;
+    max-width: 400px;
+}
+
+.cluster-popup h6 {
+    color: black !important;
+    margin-bottom: 8px;
+}
+
+.cluster-popup p {
+    color: black !important;
+}
+
+.cluster-popup small {
+    color: black !important;
+}
+
+.applicant-item {
+    transition: background-color 0.2s;
+}
+
+.applicant-item:hover {
+    background-color: #e9ecef !important;
+}
+
+.info {
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* Make zoom controls black */
+.leaflet-control-zoom a {
+    color: black !important;
+    background-color: white !important;
+    border: 1px solid #ccc !important;
+}
+
+.leaflet-control-zoom a:hover {
+    background-color: #f5f5f5 !important;
+    color: black !important;
+}
+</style>
+{% endblock %}

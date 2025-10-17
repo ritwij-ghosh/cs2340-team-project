@@ -6,6 +6,7 @@ app_name = 'jobs'
 urlpatterns = [
     path('', views.index, name='index'),
     path('map/', views.map_view, name='map'),
+    path('applicant-clusters/', views.applicant_cluster_map, name='applicant_cluster_map'),
     path('<int:pk>/', views.detail, name='detail'),
     path('<int:pk>/geocode/', views.geocode_job, name='geocode_job'),
     path('post/', views.post_job, name='post_job'),

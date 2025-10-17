@@ -282,3 +282,77 @@ def geocode_job(request, job_id):
             'success': False,
             'message': 'Failed to geocode location'
         }, status=400)
+
+
+@login_required
+def applicant_cluster_map(request):
+    """Display clusters of applicants by location for recruiters."""
+    # Only allow recruiters to view the applicant cluster map
+    try:
+        user_profile = request.user.user_profile
+        if not user_profile.is_recruiter():
+            messages.warning(request, 'Only recruiters can view the applicant cluster map.')
+            return redirect('jobs:index')
+    except:
+        messages.warning(request, 'Please complete your profile setup first.')
+        return redirect('profiles:create')
+    
+    # Get all job seekers with profiles and location data
+    from profiles.models import Profile
+    from accounts.models import UserProfile
+    
+    # Get job seekers with public profiles and location data
+    job_seeker_profiles = Profile.objects.filter(
+        is_public=True,
+        show_location=True,
+        location__isnull=False
+    ).exclude(location__in=['', 'Remote', 'remote', 'Anywhere', 'anywhere'])
+    
+    # Prepare applicant data for clustering
+    applicants_data = []
+    location_counts = {}
+    
+    for profile in job_seeker_profiles:
+        # Geocode the location
+        lat, lon = geocode_location(profile.location)
+        
+        if lat is not None and lon is not None:
+            # Count applicants by location for clustering
+            location_key = f"{lat:.4f},{lon:.4f}"
+            if location_key not in location_counts:
+                location_counts[location_key] = {
+                    'latitude': lat,
+                    'longitude': lon,
+                    'location': profile.location,
+                    'count': 0,
+                    'applicants': []
+                }
+            
+            location_counts[location_key]['count'] += 1
+            location_counts[location_key]['applicants'].append({
+                'name': profile.user.get_full_name() or profile.user.username,
+                'headline': profile.headline,
+                'skills': profile.get_skills_list()[:3],  # First 3 skills
+                'profile_url': f"/profiles/{profile.user.id}/"
+            })
+    
+    # Convert to list for template
+    for location_data in location_counts.values():
+        applicants_data.append({
+            'latitude': location_data['latitude'],
+            'longitude': location_data['longitude'],
+            'location': location_data['location'],
+            'count': location_data['count'],
+            'applicants': location_data['applicants']
+        })
+    
+    # Sort by count (highest first)
+    applicants_data.sort(key=lambda x: x['count'], reverse=True)
+    
+    context = {
+        'template_data': {'title': 'Applicant Clusters - HireBuzz'},
+        'applicants_data': applicants_data,
+        'total_applicants': sum(data['count'] for data in applicants_data),
+        'unique_locations': len(applicants_data),
+    }
+    return render(request, 'jobs/applicant_cluster_map.html', context)

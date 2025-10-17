@@ -265,6 +265,7 @@
             {% if user.is_authenticated %}
               {% if user.user_profile.is_recruiter %}
                 <a class="nav-link" href="{% url 'profiles:index' %}">Candidates</a>
+                <a class="nav-link" href="{% url 'jobs:applicant_cluster_map' %}">Applicant Clusters</a>
                 <a class="nav-link" href="{% url 'jobs:my_jobs' %}">My Jobs</a>
                 <a class="nav-link" href="{% url 'jobs:post_job' %}">Post Job</a>
               {% elif user.user_profile.is_job_seeker %}
