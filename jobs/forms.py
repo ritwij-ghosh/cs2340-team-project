@@ -204,6 +204,28 @@ class JobSearchForm(forms.Form):
         })
     )
 
+    # Commute radius filters
+    enable_commute_filter = forms.BooleanField(
+        required=False,
+        widget=forms.CheckboxInput(attrs={
+            'class': 'form-check-input',
+            'id': 'enable_commute_filter'
+        })
+    )
+
+    commute_radius = forms.IntegerField(
+        required=False,
+        min_value=1,
+        max_value=500,
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Miles',
+            'min': '1',
+            'max': '500',
+            'id': 'commute_radius_input'
+        })
+    )
+
     def clean(self):
         cleaned_data = super().clean()
         salary_min = cleaned_data.get('salary_min')

@@ -24,6 +24,8 @@ def index(request):
         salary_max = form.cleaned_data.get('salary_max')
         visa_sponsorship = form.cleaned_data.get('visa_sponsorship')
         remote_only = form.cleaned_data.get('remote_only')
+        enable_commute_filter = form.cleaned_data.get('enable_commute_filter')
+        commute_radius = form.cleaned_data.get('commute_radius')
 
         # Text search across multiple fields
         if search:
@@ -82,14 +84,18 @@ def index(request):
         if remote_only:
             jobs = jobs.filter(work_type__in=['remote', 'hybrid'])
 
-    # Apply commute radius filtering for job seekers
-    if request.user.is_authenticated:
+    # Apply commute radius filtering if enabled
+    commute_filter_applied = False
+    if request.user.is_authenticated and enable_commute_filter:
         try:
             user_profile = request.user.profile
-            if user_profile.location and user_profile.commute_radius:
+            if user_profile.location:
                 from jobs.utils import geocode_location, filter_jobs_by_distance
                 user_lat, user_lon = geocode_location(user_profile.location)
                 if user_lat and user_lon:
+                    # Use form commute_radius or fall back to profile default
+                    radius_to_use = commute_radius if commute_radius else user_profile.commute_radius
+                    
                     # Convert jobs to list format for distance filtering
                     jobs_list = []
                     for job in jobs:
@@ -110,23 +116,16 @@ def index(request):
                     
                     # Filter by distance
                     filtered_jobs = filter_jobs_by_distance(
-                        jobs_list, user_lat, user_lon, user_profile.commute_radius
+                        jobs_list, user_lat, user_lon, radius_to_use
                     )
                     
                     # Get job IDs that passed the distance filter
                     filtered_job_ids = [job['id'] for job in filtered_jobs]
                     jobs = jobs.filter(id__in=filtered_job_ids)
+                    commute_filter_applied = True
         except:
             pass
 
-    # Check if commute radius filtering was applied
-    commute_filter_applied = False
-    if request.user.is_authenticated:
-        try:
-            user_profile = request.user.profile
-            commute_filter_applied = bool(user_profile.location and user_profile.commute_radius)
-        except:
-            pass
 
     context = {
         'template_data': {'title': 'Jobs - HireBuzz'},

@@ -113,6 +113,27 @@
               </div>
             </div>
           </div>
+          
+          <!-- Commute Radius Filter -->
+          {% if user.is_authenticated and user.profile.location %}
+          <div class="col-12">
+            <label class="form-label text-light">Commute Filter</label>
+            <div class="d-flex align-items-center gap-3">
+              <div class="form-check">
+                {{ search_form.enable_commute_filter }}
+                <label class="form-check-label text-light" for="{{ search_form.enable_commute_filter.id_for_label }}">
+                  <i class="fas fa-map-marker-alt me-1"></i>Filter by distance from {{ user.profile.location }}
+                </label>
+              </div>
+              <div class="d-flex align-items-center gap-2" id="commute_radius_group" style="display: none !important;">
+                <label for="{{ search_form.commute_radius.id_for_label }}" class="form-label mb-0 text-light">Within</label>
+                {{ search_form.commute_radius }}
+                <span class="text-light">miles</span>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+          </div>
         </div>
       </form>
     </div>
@@ -122,8 +143,8 @@
   {% if commute_filter_applied %}
   <div class="alert alert-info mb-4" role="alert">
     <i class="fas fa-map-marker-alt me-2"></i>
-    <strong>Jobs filtered by your commute radius!</strong> 
-    Showing jobs within {{ user.profile.commute_radius }} miles of {{ user.profile.location }}. 
+    <strong>Jobs filtered by commute radius!</strong> 
+    Showing jobs within {{ search_form.commute_radius.value|default:user.profile.commute_radius }} miles of {{ user.profile.location }}. 
     <a href="{% url 'profiles:edit' %}" class="btn btn-sm btn-outline-primary ms-2">
       <i class="fas fa-edit me-1"></i>Adjust Settings
     </a>
@@ -143,6 +164,34 @@
       });
       form.submit();
     }
+
+    // Handle commute filter toggle
+    document.addEventListener('DOMContentLoaded', function() {
+      const commuteCheckbox = document.getElementById('enable_commute_filter');
+      const commuteRadiusGroup = document.getElementById('commute_radius_group');
+      const commuteRadiusInput = document.getElementById('commute_radius_input');
+      
+      if (commuteCheckbox && commuteRadiusGroup && commuteRadiusInput) {
+        // Set default radius from user profile
+        {% if user.is_authenticated and user.profile.commute_radius %}
+        commuteRadiusInput.value = {{ user.profile.commute_radius }};
+        {% endif %}
+        
+        // Show/hide radius input based on checkbox
+        function toggleCommuteRadius() {
+          if (commuteCheckbox.checked) {
+            commuteRadiusGroup.style.display = 'flex';
+          } else {
+            commuteRadiusGroup.style.display = 'none';
+          }
+        }
+        
+        commuteCheckbox.addEventListener('change', toggleCommuteRadius);
+        
+        // Initial state
+        toggleCommuteRadius();
+      }
+    });
   </script>
 
   <!-- Job Listings -->
