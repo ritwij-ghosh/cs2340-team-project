@@ -76,6 +76,29 @@ class UserProfileAdmin(admin.ModelAdmin):
     list_filter = ('user_type', 'company', 'created_at')
     search_fields = ('user__username', 'user__email', 'company')
     readonly_fields = ('created_at',)
+    actions = ['export_user_profiles_csv']
+    
+    @admin.action(description='Export selected user profiles to CSV')
+    def export_user_profiles_csv(self, request, queryset):
+        """Export selected user profiles to CSV file."""
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="user_profiles_export_{timezone.now().strftime("%Y%m%d_%H%M%S")}.csv"'
+        
+        writer = csv.writer(response)
+        writer.writerow([
+            'User', 'User Email', 'User Type', 'Company', 'Created At'
+        ])
+        
+        for user_profile in queryset:
+            writer.writerow([
+                user_profile.user.username,
+                user_profile.user.email,
+                user_profile.user_type,
+                user_profile.company,
+                user_profile.created_at.strftime('%Y-%m-%d %H:%M:%S')
+            ])
+        
+        return response
 
 
 # Unregister the default User admin and register our custom one
