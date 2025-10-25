@@ -82,10 +82,57 @@ def index(request):
         if remote_only:
             jobs = jobs.filter(work_type__in=['remote', 'hybrid'])
 
+    # Apply commute radius filtering for job seekers
+    if request.user.is_authenticated:
+        try:
+            user_profile = request.user.profile
+            if user_profile.location and user_profile.commute_radius:
+                from jobs.utils import geocode_location, filter_jobs_by_distance
+                user_lat, user_lon = geocode_location(user_profile.location)
+                if user_lat and user_lon:
+                    # Convert jobs to list format for distance filtering
+                    jobs_list = []
+                    for job in jobs:
+                        if job.has_coordinates():
+                            jobs_list.append({
+                                'id': job.id,
+                                'title': job.title,
+                                'company': job.company,
+                                'location': job.location,
+                                'latitude': float(job.latitude),
+                                'longitude': float(job.longitude),
+                                'employment_type': job.get_employment_type_display(),
+                                'work_type': job.get_work_type_display(),
+                                'salary_display': job.get_salary_display(),
+                                'url': job.get_absolute_url(),
+                                'skills': job.get_skills_list()[:3],
+                            })
+                    
+                    # Filter by distance
+                    filtered_jobs = filter_jobs_by_distance(
+                        jobs_list, user_lat, user_lon, user_profile.commute_radius
+                    )
+                    
+                    # Get job IDs that passed the distance filter
+                    filtered_job_ids = [job['id'] for job in filtered_jobs]
+                    jobs = jobs.filter(id__in=filtered_job_ids)
+        except:
+            pass
+
+    # Check if commute radius filtering was applied
+    commute_filter_applied = False
+    if request.user.is_authenticated:
+        try:
+            user_profile = request.user.profile
+            commute_filter_applied = bool(user_profile.location and user_profile.commute_radius)
+        except:
+            pass
+
     context = {
         'template_data': {'title': 'Jobs - HireBuzz'},
         'jobs': jobs,
         'search_form': form,
+        'commute_filter_applied': commute_filter_applied,
     }
     return render(request, 'jobs/index.html', context)
 
@@ -208,12 +255,13 @@ def map_view(request):
             'skills': job.get_skills_list()[:3],  # First 3 skills
         })
     
-    # Get user's location from profile only
+    # Get user's location and commute radius from profile
     user_lat = None
     user_lon = None
-    max_distance = request.GET.get('distance', '100')  # Default 100 miles
+    user_commute_radius = 50  # Default commute radius
+    max_distance = request.GET.get('distance', None)  # Override from URL if provided
     
-    # Get location from user's profile
+    # Get location and commute radius from user's profile
     try:
         user_profile = request.user.profile
         if user_profile.location:
@@ -222,8 +270,14 @@ def map_view(request):
             if profile_lat and profile_lon:
                 user_lat = profile_lat
                 user_lon = profile_lon
+        # Get user's preferred commute radius
+        user_commute_radius = user_profile.commute_radius
     except:
         pass
+    
+    # Use user's preferred commute radius if no distance override is provided
+    if max_distance is None:
+        max_distance = user_commute_radius
     
     # Apply distance filtering if user location is available
     # Note: We'll pass all jobs to the template and let JavaScript handle distance filtering
@@ -244,6 +298,7 @@ def map_view(request):
         'user_lat': user_lat,
         'user_lon': user_lon,
         'max_distance': max_distance,
+        'user_commute_radius': user_commute_radius,
         'has_profile_location': has_profile_location,
     }
     return render(request, 'jobs/map.html', context)

@@ -67,6 +67,12 @@ class Profile(models.Model):
         null=True,
         help_text="Upload your resume (PDF, DOC, or DOCX format)"
     )
+    
+    # Commute Preferences
+    commute_radius = models.PositiveIntegerField(
+        default=50,
+        help_text="Preferred commute radius in miles (default: 50 miles)"
+    )
 
     # Privacy Settings
     is_public = models.BooleanField(

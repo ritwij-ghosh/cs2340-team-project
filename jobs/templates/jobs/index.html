@@ -118,6 +118,18 @@
     </div>
   </div>
 
+  <!-- Commute Radius Filter Notification -->
+  {% if commute_filter_applied %}
+  <div class="alert alert-info mb-4" role="alert">
+    <i class="fas fa-map-marker-alt me-2"></i>
+    <strong>Jobs filtered by your commute radius!</strong> 
+    Showing jobs within {{ user.profile.commute_radius }} miles of {{ user.profile.location }}. 
+    <a href="{% url 'profiles:edit' %}" class="btn btn-sm btn-outline-primary ms-2">
+      <i class="fas fa-edit me-1"></i>Adjust Settings
+    </a>
+  </div>
+  {% endif %}
+
   <script>
     function clearFilters() {
       const form = document.getElementById('jobSearchForm');

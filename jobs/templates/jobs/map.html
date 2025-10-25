@@ -14,12 +14,13 @@
             <div class="d-flex align-items-center gap-2">
               <label for="distanceFilter" class="form-label mb-0 text-light">Distance:</label>
               <select id="distanceFilter" class="form-select form-select-sm" style="width: auto;">
+                <option value="{{ user_commute_radius }}" selected>My Preferred ({{ user_commute_radius }} miles)</option>
                 <option value="25">25 miles</option>
                 <option value="50">50 miles</option>
                 <option value="100">100 miles</option>
                 <option value="200">200 miles</option>
                 <option value="500">500 miles</option>
-                <option value="all" selected>All jobs</option>
+                <option value="all">All jobs</option>
               </select>
             </div>
             <span class="badge bg-primary">{{ jobs_count }} jobs on map</span>
@@ -81,6 +82,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const userLat = {{ user_lat|default:"null" }};
     const userLon = {{ user_lon|default:"null" }};
     const maxDistance = {{ max_distance|default:"100" }};
+    const userCommuteRadius = {{ user_commute_radius|default:"50" }};
     
     // Create markers for each job
     let markers = [];
@@ -252,12 +254,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize map with current data
     createJobMarkers(jobsData);
     
-    // Apply initial distance filtering if user location is available and not "All jobs"
+    // Apply initial distance filtering if user location is available
     if (userLat && userLon) {
-        const initialDistance = document.getElementById('distanceFilter').value;
-        if (initialDistance !== 'all') {
-            updateMapWithFilter();
-        }
+        // Apply user's preferred commute radius by default
+        updateMapWithFilter();
     }
     
     // Add user location marker if coordinates are available

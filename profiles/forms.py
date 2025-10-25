@@ -52,7 +52,7 @@ class ProfileForm(forms.ModelForm):
             'headline', 'bio', 'location', 'phone',
             'skills', 'education', 'work_experience',
             'linkedin_url', 'github_url', 'portfolio_url', 'other_url',
-            'resume',
+            'resume', 'commute_radius',
             'is_public', 'show_bio', 'show_location', 'show_phone',
             'show_education', 'show_work_experience', 'show_links', 'show_resume'
         ]
@@ -105,6 +105,12 @@ class ProfileForm(forms.ModelForm):
                 'class': 'form-control',
                 'accept': '.pdf,.doc,.docx'
             }),
+            'commute_radius': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '1',
+                'max': '500',
+                'step': '1'
+            }),
             'is_public': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'show_bio': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'show_location': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
@@ -133,6 +139,7 @@ class ProfileForm(forms.ModelForm):
             'show_work_experience': 'Control whether your work experience appears on your public profile.',
             'show_links': 'Control whether your professional links appear on your public profile.',
             'resume': 'Upload your resume file (PDF, DOC, or DOCX format)',
+            'commute_radius': 'Set your preferred commute radius in miles. Jobs will be filtered by this distance on the map and job listings.',
             'show_resume': 'Allow recruiters to download your resume.',
         }
 
@@ -188,6 +195,16 @@ class ProfileForm(forms.ModelForm):
                 raise forms.ValidationError("Resume must be a PDF, DOC, or DOCX file.")
         
         return resume
+    
+    def clean_commute_radius(self):
+        """Validate commute radius is within reasonable bounds."""
+        commute_radius = self.cleaned_data.get('commute_radius')
+        if commute_radius is not None:
+            if commute_radius < 1:
+                raise forms.ValidationError("Commute radius must be at least 1 mile.")
+            if commute_radius > 500:
+                raise forms.ValidationError("Commute radius cannot exceed 500 miles.")
+        return commute_radius
 
 
 class UserForm(forms.ModelForm):
