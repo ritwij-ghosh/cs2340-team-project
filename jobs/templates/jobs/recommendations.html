@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-5">
+    <div>
+      <h1 class="display-5 fw-bold mb-2 text-light">
+        <i class="fas fa-star me-3" style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i>
+        Job Recommendations
+      </h1>
+      <p class="text-light opacity-75 mb-0 fs-5">Personalized job matches based on your skills</p>
+    </div>
+    <div class="d-flex gap-3">
+      <a href="{% url 'jobs:index' %}" class="btn btn-outline-light">
+        <i class="fas fa-briefcase me-2"></i>All Jobs
+      </a>
+      <a href="{% url 'profiles:edit' %}" class="btn btn-outline-light">
+        <i class="fas fa-user-edit me-2"></i>Edit Skills
+      </a>
+    </div>
+  </div>
+
+  <!-- User Skills Section -->
+  <div class="card mb-4" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%); backdrop-filter: blur(10px);">
+    <div class="card-body p-4">
+      <h5 class="mb-3 text-light fw-bold">
+        <i class="fas fa-tools me-2" style="color: #10b981;"></i>Your Skills
+      </h5>
+      <div class="d-flex flex-wrap gap-2">
+        {% for skill in user_skills %}
+        <span class="badge bg-success px-3 py-2" style="font-size: 0.9rem;">{{ skill }}</span>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Recommendations Info -->
+  <div class="alert alert-info mb-4">
+    <i class="fas fa-info-circle me-2"></i>
+    <strong>{{ total_recommendations }}</strong> job{% if total_recommendations != 1 %}s{% endif %} match your skills!
+    Jobs are ranked by how well they align with your profile.
+  </div>
+
+  {% if recommendations %}
+  <!-- Job Recommendations -->
+  <div class="row">
+    {% for rec in recommendations %}
+    <div class="col-12 mb-4">
+      <div class="card h-100 {% if rec.match_score >= 80 %}border-success{% elif rec.match_score >= 50 %}border-primary{% else %}border-secondary{% endif %}" style="border-width: 2px;">
+        <div class="card-body">
+          <!-- Match Score Badge -->
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div class="flex-grow-1">
+              <h5 class="card-title mb-0">
+                <a href="{% url 'jobs:detail' rec.job.pk %}" class="text-decoration-none">
+                  {{ rec.job.title }}
+                </a>
+              </h5>
+            </div>
+            <div class="ms-3">
+              <span class="badge {% if rec.match_score >= 80 %}bg-success{% elif rec.match_score >= 50 %}bg-primary{% else %}bg-secondary{% endif %} px-3 py-2" style="font-size: 1rem;">
+                <i class="fas fa-percentage me-1"></i>{{ rec.match_score|floatformat:0 }}% Match
+              </span>
+            </div>
+          </div>
+
+          <h6 class="text-primary mb-2">{{ rec.job.company }}</h6>
+
+          <!-- Job Details -->
+          <div class="mb-3">
+            <small class="text-muted">
+              <i class="fas fa-map-marker-alt me-1"></i>{{ rec.job.location }}
+              <span class="mx-2">•</span>
+              <i class="fas fa-clock me-1"></i>{{ rec.job.get_employment_type_display }}
+              <span class="mx-2">•</span>
+              <i class="fas fa-user-graduate me-1"></i>{{ rec.job.get_experience_level_display }}
+              <span class="mx-2">•</span>
+              <i class="fas fa-laptop me-1"></i>{{ rec.job.get_work_type_display }}
+            </small>
+          </div>
+
+          <!-- Matched Skills -->
+          <div class="mb-3">
+            <h6 class="text-success mb-2">
+              <i class="fas fa-check-circle me-1"></i>
+              Matching Skills ({{ rec.matched_count }}/{{ rec.total_job_skills }})
+            </h6>
+            <div class="d-flex flex-wrap gap-2">
+              {% for skill in rec.matched_skills %}
+              <span class="badge bg-success text-white px-2 py-1">
+                <i class="fas fa-check me-1"></i>{{ skill }}
+              </span>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- All Job Skills -->
+          {% if rec.job.get_skills_list %}
+          <div class="mb-3">
+            <h6 class="text-muted mb-2" style="font-size: 0.9rem;">All Required Skills:</h6>
+            <div class="d-flex flex-wrap gap-2">
+              {% for skill in rec.job.get_skills_list %}
+              <span class="badge {% if skill.lower in rec.matched_skills %}bg-success{% else %}bg-light text-dark{% endif %} px-2 py-1">
+                {{ skill }}
+              </span>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+
+          <!-- Salary Info -->
+          {% if rec.job.has_salary_range %}
+          <div class="mb-2">
+            <small class="text-muted">
+              <i class="fas fa-dollar-sign me-1"></i>{{ rec.job.get_salary_display }}
+            </small>
+          </div>
+          {% endif %}
+
+          <!-- Visa Sponsorship -->
+          {% if rec.job.visa_sponsorship %}
+          <div class="mb-2">
+            <span class="badge bg-info text-dark">
+              <i class="fas fa-passport me-1"></i>Visa Sponsorship Available
+            </span>
+          </div>
+          {% endif %}
+
+          <!-- Job Description Preview -->
+          <p class="card-text text-muted mb-3" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+            {{ rec.job.description|truncatewords:30 }}
+          </p>
+
+          <!-- Action Buttons -->
+          <div class="d-flex gap-2">
+            <a href="{% url 'jobs:detail' rec.job.pk %}" class="btn btn-primary">
+              <i class="fas fa-eye me-1"></i>View Details
+            </a>
+            <small class="text-muted align-self-center ms-2">
+              Posted {{ rec.job.created_at|date:"M d, Y" }}
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <!-- No Recommendations -->
+  <div class="card">
+    <div class="card-body text-center py-5">
+      <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
+      <h4 class="text-muted mb-3">No recommendations found</h4>
+      <p class="text-muted mb-4">
+        We couldn't find any jobs matching your current skills. Try adding more skills to your profile or check back later for new opportunities.
+      </p>
+      <div class="d-flex gap-2 justify-content-center">
+        <a href="{% url 'profiles:edit' %}" class="btn btn-primary">
+          <i class="fas fa-user-edit me-2"></i>Edit Profile
+        </a>
+        <a href="{% url 'jobs:index' %}" class="btn btn-outline-primary">
+          <i class="fas fa-briefcase me-2"></i>Browse All Jobs
+        </a>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Help Section -->
+  <div class="card mt-4" style="background: linear-gradient(135deg, rgba(30, 58, 138, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%); backdrop-filter: blur(10px);">
+    <div class="card-body">
+      <h5 class="mb-3 text-light fw-bold">
+        <i class="fas fa-lightbulb me-2" style="color: #3b82f6;"></i>How Recommendations Work
+      </h5>
+      <ul class="text-light mb-0">
+        <li>Jobs are matched based on the skills listed in your profile</li>
+        <li>Match percentage shows how many of the job's required skills you have</li>
+        <li>Higher match percentages mean the job is a better fit for your skillset</li>
+        <li>Update your skills regularly to receive the most relevant recommendations</li>
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

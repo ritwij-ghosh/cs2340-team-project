@@ -110,13 +110,13 @@ def calculate_distance(lat1, lon1, lat2, lon2):
 def filter_jobs_by_distance(jobs, user_lat, user_lon, max_distance_miles):
     """
     Filter jobs by distance from user's location.
-    
+
     Args:
         jobs: List of job dictionaries with latitude/longitude
         user_lat: User's latitude
         user_lon: User's longitude
         max_distance_miles: Maximum distance in miles
-    
+
     Returns:
         list: Filtered and sorted jobs by distance
     """
@@ -129,7 +129,110 @@ def filter_jobs_by_distance(jobs, user_lat, user_lon, max_distance_miles):
         if distance <= max_distance_miles:
             job['distance'] = round(distance, 1)
             filtered_jobs.append(job)
-    
+
     # Sort by distance
     filtered_jobs.sort(key=lambda x: x['distance'])
     return filtered_jobs
+
+
+def calculate_skill_match_score(profile_skills, job_skills):
+    """
+    Calculate a match score between a profile's skills and a job's required skills.
+    Uses case-insensitive matching and partial word matching.
+
+    Args:
+        profile_skills: List or comma-separated string of profile skills
+        job_skills: List or comma-separated string of job required skills
+
+    Returns:
+        dict: {
+            'score': float (0-100),
+            'matched_skills': list of matching skills,
+            'total_job_skills': int
+        }
+    """
+    # Normalize inputs to lowercase lists
+    if isinstance(profile_skills, str):
+        profile_skills = [skill.strip().lower() for skill in profile_skills.split(',') if skill.strip()]
+    else:
+        profile_skills = [skill.strip().lower() for skill in profile_skills if skill.strip()]
+
+    if isinstance(job_skills, str):
+        job_skills = [skill.strip().lower() for skill in job_skills.split(',') if skill.strip()]
+    else:
+        job_skills = [skill.strip().lower() for skill in job_skills if skill.strip()]
+
+    if not job_skills or not profile_skills:
+        return {
+            'score': 0.0,
+            'matched_skills': [],
+            'total_job_skills': len(job_skills)
+        }
+
+    # Find matching skills (exact and partial matches)
+    matched_skills = []
+    for job_skill in job_skills:
+        for profile_skill in profile_skills:
+            # Exact match or partial word match
+            if (job_skill == profile_skill or
+                job_skill in profile_skill or
+                profile_skill in job_skill):
+                matched_skills.append(job_skill)
+                break
+
+    # Calculate score as percentage of required skills matched
+    score = (len(matched_skills) / len(job_skills)) * 100
+
+    return {
+        'score': round(score, 1),
+        'matched_skills': matched_skills,
+        'total_job_skills': len(job_skills)
+    }
+
+
+def get_job_recommendations(user_profile, limit=20):
+    """
+    Get personalized job recommendations for a job seeker based on their skills.
+
+    Args:
+        user_profile: Profile model instance for the job seeker
+        limit: Maximum number of recommendations to return
+
+    Returns:
+        list: List of job dictionaries with match scores, sorted by relevance
+    """
+    from jobs.models import Job
+
+    # Get active jobs
+    jobs = Job.objects.filter(status='active')
+
+    # Get user's skills
+    user_skills = user_profile.get_skills_list()
+
+    if not user_skills:
+        # If user has no skills, return recent jobs
+        return []
+
+    recommendations = []
+
+    for job in jobs:
+        job_skills = job.get_skills_list()
+
+        # Calculate skill match score
+        match_result = calculate_skill_match_score(user_skills, job_skills)
+
+        # Only include jobs with at least some skill match
+        if match_result['score'] > 0:
+            recommendations.append({
+                'job': job,
+                'match_score': match_result['score'],
+                'matched_skills': match_result['matched_skills'],
+                'matched_count': len(match_result['matched_skills']),
+                'total_job_skills': match_result['total_job_skills'],
+            })
+
+    # Sort by match score (highest first), then by creation date (newest first)
+    recommendations.sort(key=lambda x: (x['match_score'], x['job'].created_at), reverse=True)
+
+    # Apply limit
+    return recommendations[:limit]

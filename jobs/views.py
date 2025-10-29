@@ -5,7 +5,7 @@ from django.db.models import Q
 from django.http import JsonResponse
 from .models import Job
 from .forms import JobForm, JobSearchForm
-from .utils import geocode_location
+from .utils import geocode_location, get_job_recommendations
 
 
 def index(request):
@@ -410,3 +410,40 @@ def applicant_cluster_map(request):
         'unique_locations': len(applicants_data),
     }
     return render(request, 'jobs/applicant_cluster_map.html', context)
+
+
+@login_required
+def recommendations(request):
+    """Display personalized job recommendations for job seekers based on their skills."""
+    # Only allow job seekers to view recommendations
+    try:
+        user_profile = request.user.user_profile
+        if not user_profile.is_job_seeker():
+            messages.warning(request, 'Only job seekers can view job recommendations.')
+            return redirect('jobs:index')
+    except:
+        messages.warning(request, 'Please complete your profile setup first.')
+        return redirect('profiles:create')
+
+    # Check if user has a profile with skills
+    try:
+        profile = request.user.profile
+        user_skills = profile.get_skills_list()
+
+        if not user_skills:
+            messages.info(request, 'Add skills to your profile to receive personalized job recommendations.')
+            return redirect('profiles:edit')
+    except:
+        messages.warning(request, 'Please create your profile first to receive recommendations.')
+        return redirect('profiles:create')
+
+    # Get recommendations
+    recommendations_list = get_job_recommendations(profile, limit=20)
+
+    context = {
+        'template_data': {'title': 'Job Recommendations - HireBuzz'},
+        'recommendations': recommendations_list,
+        'user_skills': user_skills,
+        'total_recommendations': len(recommendations_list),
+    }
+    return render(request, 'jobs/recommendations.html', context)
