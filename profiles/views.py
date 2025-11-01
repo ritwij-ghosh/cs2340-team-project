@@ -2,9 +2,12 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.models import User
-from .models import Profile
+from .models import Profile, SavedCandidateSearch
 from .forms import ProfileForm, UserForm
 from django.db.models import Q
+from django.utils import timezone
+from django.conf import settings
+from communications.models import Message
 
 
 def index(request):
@@ -129,6 +132,160 @@ def index(request):
         'template_data': {'title': 'Profiles - HireBuzz'}
     }
     return render(request, 'profiles/index.html', context)
+
+
+def _user_is_recruiter(user):
+    if not user.is_authenticated:
+        return False
+    if hasattr(user, 'user_profile'):
+        # Support either boolean helper methods or user_type field
+        if hasattr(user.user_profile, 'is_recruiter') and callable(user.user_profile.is_recruiter):
+            return bool(user.user_profile.is_recruiter())
+        return getattr(user.user_profile, 'user_type', '') == 'recruiter'
+    return False
+
+
+@login_required
+def save_search(request):
+    """Save the current candidate search filters for a recruiter."""
+    if not _user_is_recruiter(request.user):
+        messages.error(request, 'Only recruiters can save candidate searches.')
+        return redirect('profiles:index')
+
+    skills = (request.GET.get('skills') or '').strip()
+    location = (request.GET.get('location') or '').strip()
+    projects = (request.GET.get('projects') or '').strip()
+
+    # Disallow saving an empty search (no filters applied)
+    if not any([skills, location, projects]):
+        messages.warning(request, 'Add at least one filter before saving a search.')
+        return redirect('profiles:index')
+
+    # Avoid duplicates: if identical search exists, just acknowledge
+    existing = SavedCandidateSearch.objects.filter(
+        user=request.user, skills=skills, location=location, projects=projects
+    ).first()
+    if existing:
+        messages.info(request, 'This search is already saved. You can access it from Saved Searches.')
+        return redirect('profiles:saved_searches')
+
+    SavedCandidateSearch.objects.create(
+        user=request.user,
+        skills=skills,
+        location=location,
+        projects=projects,
+    )
+    messages.success(request, 'Search saved successfully!')
+    return redirect('profiles:saved_searches')
+
+
+@login_required
+def saved_searches(request):
+    if not _user_is_recruiter(request.user):
+        messages.error(request, 'Only recruiters can access saved candidate searches.')
+        return redirect('profiles:index')
+    searches = SavedCandidateSearch.objects.filter(user=request.user)
+    context = {
+        'searches': searches,
+        'template_data': {'title': 'Saved Candidate Searches - HireBuzz'}
+    }
+    return render(request, 'profiles/saved_searches.html', context)
+
+
+def _apply_profile_filters(queryset, skills, location, projects):
+    if location:
+        queryset = queryset.filter(location__icontains=location)
+    if skills:
+        raw_tokens = [token.strip() for token in skills.replace('\n', ' ').replace('\t', ' ').split(',')]
+        tokens = []
+        for chunk in raw_tokens:
+            if not chunk:
+                continue
+            tokens.extend([t for t in chunk.split(' ') if t])
+        for token in tokens:
+            queryset = queryset.filter(skills__icontains=token)
+    if projects:
+        queryset = queryset.filter(
+            Q(work_experience__icontains=projects)
+            | Q(bio__icontains=projects)
+            | Q(education__icontains=projects)
+            | Q(linkedin_url__icontains=projects)
+            | Q(github_url__icontains=projects)
+            | Q(portfolio_url__icontains=projects)
+            | Q(other_url__icontains=projects)
+        )
+    return queryset
+
+
+@login_required
+def run_saved_search(request, pk):
+    """Run a saved search, send notification about new matches since last check, and show results."""
+    if not _user_is_recruiter(request.user):
+        messages.error(request, 'Only recruiters can run saved candidate searches.')
+        return redirect('profiles:index')
+
+    saved = get_object_or_404(SavedCandidateSearch, id=pk, user=request.user)
+    profiles_qs = Profile.objects.filter(is_public=True)
+    profiles_qs = _apply_profile_filters(profiles_qs, saved.skills, saved.location, saved.projects)
+
+    # Determine new matches since last_checked_at
+    if saved.last_checked_at:
+        new_matches = profiles_qs.filter(updated_at__gt=saved.last_checked_at)
+    else:
+        new_matches = profiles_qs
+    new_match_ids = list(new_matches.values_list('id', flat=True))
+
+    # Send an in-platform message to the recruiter with a summary
+    new_count = new_matches.count()
+    if new_count > 0:
+        subject = 'New candidate matches for your saved search'
+        lines = [
+            'You have new candidate matches on HireBuzz.',
+            f"Filters: skills='{saved.skills or '-'}', location='{saved.location or '-'}', projects='{saved.projects or '-'}'",
+            f'Total matches now: {profiles_qs.count()}',
+            f'New since last check: {new_count}',
+            '',
+            'Top new matches:',
+        ]
+        for p in new_matches.select_related('user')[:5]:
+            lines.append(f"- {p.user.get_full_name() or p.user.username} | {p.headline} | {p.location}")
+        lines.append('\nVisit your saved searches to view all matches.')
+
+        # Use a system sender to avoid duplicate sent/received for the recruiter
+        system_user, _ = User.objects.get_or_create(
+            username='system_notifications',
+            defaults={'first_name': 'System', 'last_name': 'Notifications', 'email': ''}
+        )
+        Message.objects.create(
+            sender=system_user,
+            recipient=request.user,
+            subject=subject,
+            body='\n'.join(lines),
+        )
+
+    saved.last_checked_at = timezone.now()
+    saved.last_notified_count = new_count
+    saved.save(update_fields=['last_checked_at', 'last_notified_count'])
+
+    context = {
+        'saved_search': saved,
+        'profiles': profiles_qs.select_related('user'),
+        'new_count': new_count,
+        'new_ids': new_match_ids,
+        'template_data': {'title': 'Saved Search Results - HireBuzz'}
+    }
+    return render(request, 'profiles/saved_searches.html', context)
+
+
+@login_required
+def delete_saved_search(request, pk):
+    if not _user_is_recruiter(request.user):
+        messages.error(request, 'Only recruiters can manage saved candidate searches.')
+        return redirect('profiles:index')
+    saved = get_object_or_404(SavedCandidateSearch, id=pk, user=request.user)
+    saved.delete()
+    messages.success(request, 'Saved search deleted.')
+    return redirect('profiles:saved_searches')
 
 
 @login_required
