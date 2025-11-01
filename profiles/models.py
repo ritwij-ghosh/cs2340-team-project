@@ -137,3 +137,29 @@ class Profile(models.Model):
     def has_public_resume(self):
         """Check if resume should be shown to other users."""
         return self.show_resume and self.has_resume()
+
+
+class SavedCandidateSearch(models.Model):
+    """A saved candidate search for recruiters with basic notification tracking."""
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='saved_candidate_searches')
+    skills = models.CharField(max_length=500, blank=True)
+    location = models.CharField(max_length=200, blank=True)
+    projects = models.CharField(max_length=500, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_checked_at = models.DateTimeField(blank=True, null=True)
+    last_notified_count = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        parts = []
+        if self.skills:
+            parts.append(f"skills={self.skills}")
+        if self.location:
+            parts.append(f"location={self.location}")
+        if self.projects:
+            parts.append(f"projects={self.projects}")
+        summary = ', '.join(parts) or 'all profiles'
+        return f"Search by {self.user.username}: {summary}"

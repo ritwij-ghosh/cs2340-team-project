@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.http import HttpResponse
 from django.utils import timezone
 import csv
-from .models import Profile
+from .models import Profile, SavedCandidateSearch
 
 
 @admin.register(Profile)
@@ -76,3 +76,10 @@ class ProfileAdmin(admin.ModelAdmin):
             ])
         
         return response
+
+
+@admin.register(SavedCandidateSearch)
+class SavedCandidateSearchAdmin(admin.ModelAdmin):
+    list_display = ('user', 'skills', 'location', 'projects', 'created_at', 'last_checked_at', 'last_notified_count')
+    list_filter = ('created_at', 'last_checked_at')
+    search_fields = ('user__username', 'skills', 'location', 'projects')
