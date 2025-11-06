@@ -236,3 +236,72 @@ def get_job_recommendations(user_profile, limit=20):
 
     # Apply limit
     return recommendations[:limit]
+
+
+def get_candidate_recommendations(job, limit=20):
+    """
+    Get candidate recommendations for a recruiter's job posting based on skill matching.
+    
+    Args:
+        job: Job model instance
+        limit: Maximum number of recommendations to return
+    
+    Returns:
+        list: List of candidate dictionaries with match scores, sorted by relevance
+    """
+    from profiles.models import Profile
+    from applications.models import Application
+    
+    # Get all public profiles (job seekers only)
+    # Profile is linked to User, and User has UserProfile which has user_type
+    from accounts.models import UserProfile
+    job_seeker_users = UserProfile.objects.filter(
+        user_type='job_seeker'
+    ).values_list('user', flat=True)
+    
+    candidates = Profile.objects.filter(
+        is_public=True,
+        user__in=job_seeker_users
+    )
+    
+    # Get job skills
+    job_skills = job.get_skills_list()
+    
+    if not job_skills:
+        # If job has no skills, return empty
+        return []
+    
+    # Get candidates who have already applied (to exclude them)
+    existing_applicants = Application.objects.filter(job=job).values_list('user', flat=True)
+    
+    recommendations = []
+    
+    for candidate in candidates:
+        # Skip if candidate has already applied
+        if candidate.user.id in existing_applicants:
+            continue
+        
+        # Get candidate skills
+        candidate_skills = candidate.get_skills_list()
+        
+        if not candidate_skills:
+            continue
+        
+        # Calculate skill match score
+        match_result = calculate_skill_match_score(candidate_skills, job_skills)
+        
+        # Only include candidates with at least some skill match
+        if match_result['score'] > 0:
+            recommendations.append({
+                'candidate': candidate,
+                'match_score': match_result['score'],
+                'matched_skills': match_result['matched_skills'],
+                'matched_count': len(match_result['matched_skills']),
+                'total_job_skills': match_result['total_job_skills'],
+            })
+    
+    # Sort by match score (highest first), then by profile update date (most recent first)
+    recommendations.sort(key=lambda x: (x['match_score'], x['candidate'].updated_at), reverse=True)
+    
+    # Apply limit
+    return recommendations[:limit]

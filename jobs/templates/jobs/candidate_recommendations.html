@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+/* Disable hover effects on candidate cards */
+.card:hover {
+    transform: none !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+}
+</style>
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-5">
+    <div>
+      <h1 class="display-5 fw-bold mb-2 text-light">
+        <i class="fas fa-users me-3" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i>
+        Candidate Recommendations
+      </h1>
+      <p class="text-light opacity-75 mb-0 fs-5">Qualified candidates for "{{ job.title }}"</p>
+    </div>
+    <div class="d-flex gap-3">
+      <a href="{% url 'jobs:detail' job.pk %}" class="btn btn-outline-light">
+        <i class="fas fa-briefcase me-2"></i>View Job
+      </a>
+      <a href="{% url 'jobs:my_jobs' %}" class="btn btn-outline-light">
+        <i class="fas fa-list me-2"></i>My Jobs
+      </a>
+    </div>
+  </div>
+
+  <!-- Job Skills Section -->
+  <div class="card mb-4" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.1) 100%); backdrop-filter: blur(10px);">
+    <div class="card-body p-4">
+      <h5 class="mb-3 text-light fw-bold">
+        <i class="fas fa-tools me-2" style="color: #3b82f6;"></i>Required Skills for {{ job.title }}
+      </h5>
+      <div class="d-flex flex-wrap gap-2">
+        {% for skill in job_skills %}
+        <span class="badge bg-primary px-3 py-2" style="font-size: 0.9rem;">{{ skill }}</span>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Recommendations Info -->
+  <div class="alert alert-info mb-4">
+    <i class="fas fa-info-circle me-2"></i>
+    <strong>{{ total_recommendations }}</strong> candidate{% if total_recommendations != 1 %}s{% endif %} match your job requirements!
+    Candidates are ranked by how well their skills align with your job posting.
+  </div>
+
+  {% if recommendations %}
+  <!-- Candidate Recommendations -->
+  <div class="row justify-content-center">
+    {% for rec in recommendations %}
+    <div class="col-12 col-lg-10 mb-4">
+      <div class="card h-100 {% if rec.match_score >= 80 %}border-success{% elif rec.match_score >= 50 %}border-primary{% else %}border-secondary{% endif %}" style="border-width: 2px;">
+        <div class="card-body">
+          <!-- Match Score Badge -->
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div class="flex-grow-1">
+              <h5 class="card-title mb-0">
+                <a href="{% url 'profiles:view' rec.candidate.user.id %}" class="text-decoration-none">
+                  {{ rec.candidate.user.get_full_name|default:rec.candidate.user.username }}
+                </a>
+              </h5>
+              {% if rec.candidate.headline %}
+              <p class="text-muted mb-1">{{ rec.candidate.headline }}</p>
+              {% endif %}
+            </div>
+            <div class="ms-3">
+              <span class="badge {% if rec.match_score >= 80 %}bg-success{% elif rec.match_score >= 50 %}bg-primary{% else %}bg-secondary{% endif %} px-3 py-2" style="font-size: 1rem;">
+                <i class="fas fa-percentage me-1"></i>{{ rec.match_score|floatformat:0 }}% Match
+              </span>
+            </div>
+          </div>
+
+          <!-- Candidate Details -->
+          <div class="mb-3">
+            <small class="text-muted">
+              {% if rec.candidate.show_location and rec.candidate.location %}
+              <i class="fas fa-map-marker-alt me-1"></i>{{ rec.candidate.location }}
+              <span class="mx-2">•</span>
+              {% endif %}
+              <i class="fas fa-calendar me-1"></i>Profile updated {{ rec.candidate.updated_at|date:"M d, Y" }}
+            </small>
+          </div>
+
+          <!-- Matched Skills -->
+          <div class="mb-3">
+            <h6 class="text-success mb-2">
+              <i class="fas fa-check-circle me-1"></i>
+              Matching Skills ({{ rec.matched_count }}/{{ rec.total_job_skills }})
+            </h6>
+            <div class="d-flex flex-wrap gap-2">
+              {% for skill in rec.matched_skills %}
+              <span class="badge bg-success text-white px-2 py-1">
+                <i class="fas fa-check me-1"></i>{{ skill }}
+              </span>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- Candidate Skills -->
+          {% if rec.candidate.get_skills_list %}
+          <div class="mb-3">
+            <h6 class="text-muted mb-2" style="font-size: 0.9rem;">All Skills:</h6>
+            <div class="d-flex flex-wrap gap-2">
+              {% for skill in rec.candidate.get_skills_list %}
+              <span class="badge bg-light text-dark px-2 py-1">{{ skill }}</span>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+
+          <!-- Bio Preview -->
+          {% if rec.candidate.show_bio and rec.candidate.bio %}
+          <p class="card-text text-muted mb-3" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+            {{ rec.candidate.bio|truncatewords:30 }}
+          </p>
+          {% endif %}
+
+          <!-- Action Buttons -->
+          <div class="d-flex gap-2">
+            <a href="{% url 'profiles:view' rec.candidate.user.id %}" class="btn btn-primary">
+              <i class="fas fa-eye me-1"></i>View Profile
+            </a>
+            <a href="{% url 'communications:send_message' %}?recipient={{ rec.candidate.user.id }}" class="btn btn-outline-primary">
+              <i class="fas fa-envelope me-1"></i>Send Message
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <!-- No Recommendations -->
+  <div class="card">
+    <div class="card-body text-center py-5">
+      <i class="fas fa-users fa-4x text-muted mb-3"></i>
+      <h4 class="text-muted mb-3">No candidate recommendations found</h4>
+      <p class="text-muted mb-4">
+        We couldn't find any candidates matching your job requirements. Try adjusting the required skills or check back later as more candidates join.
+      </p>
+      <div class="d-flex gap-2 justify-content-center">
+        <a href="{% url 'jobs:edit_job' job.pk %}" class="btn btn-primary">
+          <i class="fas fa-edit me-2"></i>Edit Job Requirements
+        </a>
+        <a href="{% url 'profiles:index' %}" class="btn btn-outline-primary">
+          <i class="fas fa-users me-2"></i>Browse All Candidates
+        </a>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Help Section -->
+  <div class="card mt-5" style="background: rgba(59, 130, 246, 0.1); backdrop-filter: blur(10px);">
+    <div class="card-body p-4">
+      <h5 class="mb-3 text-light fw-bold">
+        <i class="fas fa-lightbulb me-2" style="color: #3b82f6;"></i>How Recommendations Work
+      </h5>
+      <ul class="text-light mb-0" style="line-height: 1.8;">
+        <li>Candidates are matched based on how many of your required skills they have</li>
+        <li>Only public profiles with matching skills are shown</li>
+        <li>Candidates who have already applied are excluded</li>
+        <li>Recommendations are sorted by match score (highest first)</li>
+        <li>Update your job's required skills to get more accurate recommendations</li>
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock content %}

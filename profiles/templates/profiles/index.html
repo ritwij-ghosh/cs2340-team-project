@@ -46,6 +46,7 @@
               <div class="col-auto mt-3 d-flex align-items-center">
                 <button type="submit" class="btn btn-primary">Search</button>
                 <a href="{% url 'profiles:index' %}" class="btn btn-outline-secondary ms-1">Reset</a>
+                {% comment %}
                 {% if user.is_authenticated and user.user_profile %}
                   {% if filters.skills or filters.location or filters.projects %}
                     <a href="{% url 'profiles:save_search' %}?skills={{ filters.skills|urlencode }}&location={{ filters.location|urlencode }}&projects={{ filters.projects|urlencode }}" class="btn btn-outline-light ms-2" title="Save this search">
@@ -56,6 +57,7 @@
                   {% endif %}
                   <a href="{% url 'profiles:saved_searches' %}" class="btn btn-outline-info ms-2" title="View saved searches">Saved Searches</a>
                 {% endif %}
+                {% endcomment %}
               </div>
             </div>
           </form>

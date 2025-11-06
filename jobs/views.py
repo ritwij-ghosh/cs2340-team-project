@@ -5,7 +5,7 @@ from django.db.models import Q
 from django.http import JsonResponse
 from .models import Job
 from .forms import JobForm, JobSearchForm
-from .utils import geocode_location, get_job_recommendations
+from .utils import geocode_location, get_job_recommendations, get_candidate_recommendations
 
 
 def index(request):
@@ -447,3 +447,42 @@ def recommendations(request):
         'total_recommendations': len(recommendations_list),
     }
     return render(request, 'jobs/recommendations.html', context)
+
+
+@login_required
+def candidate_recommendations(request, job_id):
+    """Display candidate recommendations for a recruiter's job posting."""
+    # Only allow recruiters to view candidate recommendations
+    try:
+        user_profile = request.user.user_profile
+        if not user_profile.is_recruiter():
+            messages.warning(request, 'Only recruiters can view candidate recommendations.')
+            return redirect('jobs:index')
+    except:
+        messages.warning(request, 'Please complete your profile setup first.')
+        return redirect('accounts:index')
+    
+    # Get the job and verify ownership
+    job = get_object_or_404(Job, pk=job_id)
+    
+    if job.recruiter != request.user:
+        messages.error(request, 'You can only view recommendations for your own job postings.')
+        return redirect('jobs:my_jobs')
+    
+    # Check if job has required skills
+    job_skills = job.get_skills_list()
+    if not job_skills:
+        messages.info(request, 'Add required skills to your job posting to receive candidate recommendations.')
+        return redirect('jobs:edit_job', pk=job_id)
+    
+    # Get candidate recommendations
+    recommendations_list = get_candidate_recommendations(job, limit=20)
+    
+    context = {
+        'template_data': {'title': f'Candidate Recommendations - {job.title} - HireBuzz'},
+        'job': job,
+        'recommendations': recommendations_list,
+        'job_skills': job_skills,
+        'total_recommendations': len(recommendations_list),
+    }
+    return render(request, 'jobs/candidate_recommendations.html', context)
