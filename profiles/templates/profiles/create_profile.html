@@ -18,6 +18,12 @@
     border-color: #80bdff !important;
     box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25) !important;
 }
+
+/* Disable hover effects on profile card */
+.profile-card:hover {
+    transform: none !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+}
 </style>
 <div class="container">
   <div class="row justify-content-center">
@@ -326,6 +332,19 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Disable hover effects on profile card
+    const profileCard = document.querySelector('.profile-card');
+    if (profileCard) {
+        profileCard.addEventListener('mouseenter', function(e) {
+            e.stopPropagation();
+            this.style.transform = 'none';
+        });
+        profileCard.addEventListener('mouseleave', function(e) {
+            e.stopPropagation();
+            this.style.transform = 'none';
+        });
+    }
+    
     const locationSelect = document.getElementById('location-select');
     
     if (locationSelect) {

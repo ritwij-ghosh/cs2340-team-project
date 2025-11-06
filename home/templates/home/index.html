@@ -1,5 +1,18 @@
 {% extends 'base.html' %}
 {% block content %}
+<style>
+/* Disable hover effects on job opportunity cards and feature cards */
+.card:hover {
+    transform: none !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+}
+
+.feature-card:hover,
+.step-card:hover {
+    transform: none !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+}
+</style>
 <div class="container">
   <!-- Hero Section -->
   <div class="row mb-5">
@@ -248,4 +261,21 @@
     </div>
   </div>
 </div>
+
+<script>
+// Disable hover effects on cards and feature cards
+document.addEventListener('DOMContentLoaded', function() {
+    const allCards = document.querySelectorAll('.card, .feature-card, .step-card');
+    allCards.forEach(card => {
+        card.addEventListener('mouseenter', function(e) {
+            e.stopPropagation();
+            this.style.transform = 'none';
+        });
+        card.addEventListener('mouseleave', function(e) {
+            e.stopPropagation();
+            this.style.transform = 'none';
+        });
+    });
+});
+</script>
 {% endblock content %}

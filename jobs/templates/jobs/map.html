@@ -13,7 +13,7 @@
           <div class="d-flex align-items-center gap-3">
             <div class="d-flex align-items-center gap-2">
               <label for="distanceFilter" class="form-label mb-0 text-light">Distance:</label>
-              <select id="distanceFilter" class="form-select form-select-sm" style="width: auto;">
+              <select id="distanceFilter" class="form-select form-select-sm" style="width: auto; color: black !important; background-color: white !important;">
                 <option value="{{ user_commute_radius }}" selected>My Preferred ({{ user_commute_radius }} miles)</option>
                 <option value="25">25 miles</option>
                 <option value="50">50 miles</option>
@@ -366,10 +366,45 @@ document.addEventListener('DOMContentLoaded', function() {
         return div;
     };
     legend.addTo(map);
+    
+    // Disable hover effects on job map card
+    const mapCard = document.querySelector('.card');
+    if (mapCard) {
+        mapCard.addEventListener('mouseenter', function(e) {
+            e.stopPropagation();
+            this.style.transform = 'none';
+        });
+        mapCard.addEventListener('mouseleave', function(e) {
+            e.stopPropagation();
+            this.style.transform = 'none';
+        });
+    }
 });
 </script>
 
 <style>
+/* Disable hover effects on job map card */
+.card:hover {
+    transform: none !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Make dropdown text black */
+#distanceFilter {
+    color: black !important;
+    background-color: white !important;
+}
+
+#distanceFilter option {
+    color: black !important;
+    background-color: white !important;
+}
+
+#distanceFilter:focus {
+    color: black !important;
+    background-color: white !important;
+}
+
 .custom-div-icon {
     background: none !important;
     border: none !important;
