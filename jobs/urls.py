@@ -10,6 +10,7 @@ urlpatterns = [
     path('applicant-clusters/', views.applicant_cluster_map, name='applicant_cluster_map'),
     path('<int:pk>/', views.detail, name='detail'),
     path('<int:pk>/geocode/', views.geocode_job, name='geocode_job'),
+    path('<int:job_id>/candidates/', views.candidate_recommendations, name='candidate_recommendations'),
     path('post/', views.post_job, name='post_job'),
     path('<int:pk>/edit/', views.edit_job, name='edit_job'),
     path('<int:pk>/delete/', views.delete_job, name='delete_job'),
