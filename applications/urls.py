@@ -8,4 +8,6 @@ urlpatterns = [
     path('create/', views.create_application, name='create'),
     path('<int:pk>/status/', views.update_status, name='update_status'),
     path('quick-apply/', views.quick_apply, name='quick_apply'),
+    path('kanban/', views.kanban_board, name='kanban_board'),
+    path('<int:pk>/update-status-ajax/', views.update_application_status_ajax, name='update_status_ajax'),
 ]
