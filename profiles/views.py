@@ -282,6 +282,11 @@ def delete_saved_search(request, pk):
     if not _user_is_recruiter(request.user):
         messages.error(request, 'Only recruiters can manage saved candidate searches.')
         return redirect('profiles:index')
+    
+    if request.method != 'POST':
+        messages.error(request, 'Invalid request method.')
+        return redirect('profiles:saved_searches')
+    
     saved = get_object_or_404(SavedCandidateSearch, id=pk, user=request.user)
     saved.delete()
     messages.success(request, 'Saved search deleted.')

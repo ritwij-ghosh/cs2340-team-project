@@ -13,7 +13,7 @@
 
 .navbar a.nav-link {
   color: #e6edf3 !important;
-  opacity: 0.9;
+  /* Removed opacity reduction to maintain contrast */
 }
 .navbar a.nav-link:hover,
 .navbar a.nav-link:focus {
@@ -46,7 +46,7 @@
 }
 
 .bg-dark .form-control::placeholder {
-  color: #adb5bd !important;
+  color: #cbd5e1 !important; /* Improved contrast from #adb5bd */
 }
 
 .bg-dark .form-label {
@@ -54,11 +54,11 @@
 }
 
 .bg-dark .form-text {
-  color: #adb5bd !important;
+  color: #cbd5e1 !important; /* Improved contrast from #adb5bd */
 }
 
 .bg-dark .text-muted {
-  color: #adb5bd !important;
+  color: #cbd5e1 !important; /* Improved contrast from #adb5bd - meets WCAG AA */
 }
 
 .bg-dark .card-title {
@@ -83,7 +83,7 @@
 }
 
 .card.bg-dark .text-muted {
-  color: #adb5bd !important;
+  color: #cbd5e1 !important; /* Improved contrast from #adb5bd */
 }
 
 .card.bg-dark .text-primary {
@@ -112,7 +112,7 @@
 
 .card.bg-dark .text-muted,
 .card.profile-card .text-muted {
-  color: #adb5bd !important;
+  color: #cbd5e1 !important; /* Improved contrast from #adb5bd */
 }
 
 /* Profile specific styling */
@@ -134,7 +134,7 @@
 }
 
 .profile-card .text-muted {
-  color: #adb5bd !important;
+  color: #cbd5e1 !important; /* Improved contrast from #adb5bd */
 }
 
 .profile-card .text-primary {
@@ -160,7 +160,7 @@
 }
 
 .dark-form .form-text {
-  color: #adb5bd !important;
+  color: #cbd5e1 !important; /* Improved contrast from #adb5bd */
 }
 
 /* Navigation dropdown styling */
@@ -181,4 +181,179 @@
 
 .dropdown-menu-dark .dropdown-divider {
   border-color: #495057 !important;
+}
+
+/* Enhanced contrast for badges on dark backgrounds */
+.bg-dark .badge,
+.card.bg-dark .badge,
+.profile-card .badge {
+  color: #ffffff !important; /* Ensure white text on all badges for maximum contrast */
+}
+
+.bg-dark .badge.bg-secondary,
+.card.bg-dark .badge.bg-secondary,
+.profile-card .badge.bg-secondary {
+  background-color: #6b7280 !important; /* Lighter gray for better contrast */
+  color: #ffffff !important;
+}
+
+.bg-dark .badge.bg-info,
+.card.bg-dark .badge.bg-info,
+.profile-card .badge.bg-info {
+  background-color: #0ea5e9 !important; /* Ensure sufficient contrast */
+  color: #ffffff !important;
+}
+
+.bg-dark .badge.bg-warning,
+.card.bg-dark .badge.bg-warning,
+.profile-card .badge.bg-warning {
+  background-color: #f59e0b !important;
+  color: #000000 !important; /* Dark text on warning badges */
+}
+
+.bg-dark .badge.bg-success,
+.card.bg-dark .badge.bg-success,
+.profile-card .badge.bg-success {
+  background-color: #10b981 !important;
+  color: #ffffff !important;
+}
+
+.bg-dark .badge.bg-primary,
+.card.bg-dark .badge.bg-primary,
+.profile-card .badge.bg-primary {
+  background-color: #3b82f6 !important;
+  color: #ffffff !important;
+}
+
+.bg-dark .badge.bg-danger,
+.card.bg-dark .badge.bg-danger,
+.profile-card .badge.bg-danger {
+  background-color: #ef4444 !important;
+  color: #ffffff !important;
+}
+
+/* Fix bg-light badges on dark backgrounds */
+.bg-dark .badge.bg-light,
+.card.bg-dark .badge.bg-light,
+.profile-card .badge.bg-light {
+  background-color: #e5e7eb !important;
+  color: #1f2937 !important; /* Dark text on light background */
+}
+
+/* Ensure bg-info with text-dark has proper contrast */
+.badge.bg-info.text-dark {
+  background-color: #0ea5e9 !important;
+  color: #000000 !important; /* Dark text for better contrast on light blue */
+}
+
+/* Ensure bg-warning with text-dark has proper contrast */
+.badge.bg-warning.text-dark {
+  background-color: #f59e0b !important;
+  color: #000000 !important; /* Dark text on warning yellow */
+}
+
+/* Override for dark backgrounds - warning badges should have light text */
+.bg-dark .badge.bg-warning.text-dark,
+.card.bg-dark .badge.bg-warning.text-dark,
+.profile-card .badge.bg-warning.text-dark {
+  color: #000000 !important; /* Keep dark text for warning on dark backgrounds if needed */
+}
+
+/* Ensure bg-secondary with text-dark has proper contrast */
+.badge.bg-secondary.text-dark {
+  background-color: #6b7280 !important;
+  color: #ffffff !important; /* White text on gray for better contrast */
+}
+
+.bg-dark .badge.bg-secondary.text-dark,
+.card.bg-dark .badge.bg-secondary.text-dark,
+.profile-card .badge.bg-secondary.text-dark {
+  background-color: #6b7280 !important;
+  color: #ffffff !important; /* White text on gray for better contrast */
+}
+
+/* Ensure alert text has sufficient contrast */
+.alert {
+  color: #000000 !important; /* Default to dark text for light backgrounds */
+}
+
+.alert.alert-dark,
+.bg-dark .alert,
+.card.bg-dark .alert,
+.profile-card .alert {
+  color: #e6edf3 !important; /* Light text on dark backgrounds */
+}
+
+.alert.alert-info {
+  background-color: #dbeafe !important;
+  color: #000000 !important; /* Black text on light blue background for better readability */
+  border-color: #3b82f6 !important;
+}
+
+.alert.alert-success {
+  background-color: #d1fae5 !important;
+  color: #000000 !important; /* Black text on light green background for better readability */
+  border-color: #10b981 !important;
+}
+
+.alert.alert-warning {
+  background-color: #fef3c7 !important;
+  color: #92400e !important; /* Dark amber text on light yellow background */
+  border-color: #f59e0b !important;
+}
+
+.alert.alert-danger {
+  background-color: #fee2e2 !important;
+  color: #991b1b !important; /* Dark red text on light red background */
+  border-color: #ef4444 !important;
+}
+
+/* Ensure small text has sufficient contrast */
+.bg-dark small,
+.card.bg-dark small,
+.profile-card small {
+  color: #cbd5e1 !important; /* Improved contrast for small text */
+}
+
+.bg-dark .small,
+.card.bg-dark .small,
+.profile-card .small {
+  color: #cbd5e1 !important;
+}
+
+/* Fix opacity issues that reduce contrast */
+.text-light.opacity-75,
+.text-light.opacity-90 {
+  opacity: 1 !important; /* Remove opacity reduction to maintain contrast */
+  color: #cbd5e1 !important; /* Use lighter color instead of opacity */
+}
+
+/* Ensure links have sufficient contrast */
+.bg-dark a:not(.btn):not(.nav-link),
+.card.bg-dark a:not(.btn):not(.nav-link),
+.profile-card a:not(.btn):not(.nav-link) {
+  color: #60a5fa !important; /* Lighter blue for better contrast on dark */
+}
+
+.bg-dark a:not(.btn):not(.nav-link):hover,
+.card.bg-dark a:not(.btn):not(.nav-link):hover,
+.profile-card a:not(.btn):not(.nav-link):hover {
+  color: #93c5fd !important; /* Even lighter on hover */
+}
+
+/* Ensure form select text is visible */
+.bg-dark .form-select,
+.card.bg-dark .form-select,
+.profile-card .form-select {
+  background-color: #2c3e50 !important;
+  color: #e6edf3 !important;
+  border-color: #495057 !important;
+}
+
+.bg-dark .form-select:focus,
+.card.bg-dark .form-select:focus,
+.profile-card .form-select:focus {
+  background-color: #34495e !important;
+  color: #e6edf3 !important;
+  border-color: #4cd7a8 !important;
 }
