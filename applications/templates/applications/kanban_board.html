@@ -1,0 +1,394 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid px-3 px-md-4 py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="mb-1 text-light">
+        <i class="fas fa-columns me-2"></i>Applicant Pipeline
+      </h2>
+      <p class="text-muted mb-0">{{ company }} - Manage all applicants across all roles</p>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <span class="badge bg-info text-dark">
+        <i class="fas fa-users me-1"></i>{{ total_applications }} Total Applications
+      </span>
+      <a class="btn btn-outline-light" href="{% url 'jobs:my_jobs' %}">
+        <i class="fas fa-briefcase me-1"></i>My Jobs
+      </a>
+    </div>
+  </div>
+
+  {% if total_applications > 0 %}
+    <div class="kanban-board" id="kanbanBoard">
+      <div class="row g-3">
+        {% for status_code, column_data in status_columns.items %}
+          <div class="col-12 col-md-6 col-lg-4 col-xl">
+            <div class="kanban-column" data-status="{{ status_code }}">
+              <div class="card bg-dark border-secondary h-100">
+                <div class="card-header text-center py-3" style="background: linear-gradient(135deg, #1f2937 0%, #374151 100%);">
+                  <h5 class="mb-0 text-light">
+                    <span class="badge {{ column_data.badge_class }} me-2">{{ column_data.applications|length }}</span>
+                    {{ column_data.label }}
+                  </h5>
+                </div>
+                <div class="card-body p-2 kanban-column-body" 
+                     data-status="{{ status_code }}"
+                     ondrop="handleDrop(event, '{{ status_code }}')" 
+                     ondragover="handleDragOver(event)"
+                     ondragenter="handleDragEnter(event)"
+                     ondragleave="handleDragLeave(event)">
+                  {% for application in column_data.applications %}
+                    <div class="kanban-card mb-2" 
+                         draggable="true" 
+                         ondragstart="handleDragStart(event, {{ application.id }})"
+                         data-application-id="{{ application.id }}"
+                         data-current-status="{{ application.status }}">
+                      <div class="card bg-secondary border-0">
+                        <div class="card-body p-3">
+                          <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="flex-grow-1">
+                              <h6 class="mb-1 text-light fw-semibold">
+                                {% if application.job %}
+                                  <a href="{% url 'jobs:detail' application.job.pk %}" class="text-light text-decoration-none">
+                                    {{ application.job_title }}
+                                    <i class="fas fa-external-link-alt ms-1" style="font-size: 0.7em;"></i>
+                                  </a>
+                                {% else %}
+                                  {{ application.job_title }}
+                                {% endif %}
+                              </h6>
+                              <p class="text-muted mb-1 small">{{ application.company_name }}</p>
+                            </div>
+                          </div>
+                          
+                          <div class="mb-2">
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                              <i class="fas fa-user text-info" style="font-size: 0.85em;"></i>
+                              <span class="text-light small">
+                                {{ application.user.get_full_name|default:application.user.username }}
+                              </span>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                              <i class="fas fa-calendar text-warning" style="font-size: 0.85em;"></i>
+                              <span class="text-muted small">{{ application.applied_on|date:"M d, Y" }}</span>
+                            </div>
+                          </div>
+
+                          {% if application.notes %}
+                            <div class="mt-2 pt-2 border-top border-dark">
+                              <p class="text-muted small mb-0" style="max-height: 60px; overflow: hidden; text-overflow: ellipsis;">
+                                <i class="fas fa-sticky-note me-1"></i>{{ application.notes|truncatewords:15 }}
+                              </p>
+                            </div>
+                          {% endif %}
+
+                          <div class="mt-2 d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                              <i class="fas fa-clock me-1"></i>{{ application.updated_at|timesince }} ago
+                            </small>
+                            <button class="btn btn-sm btn-outline-info" 
+                                    onclick="viewApplicationDetails({{ application.id }})"
+                                    title="View Details">
+                              <i class="fas fa-eye"></i>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  {% empty %}
+                    <div class="text-center py-4 text-muted">
+                      <i class="fas fa-inbox fa-2x mb-2"></i>
+                      <p class="small mb-0">No applications</p>
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% else %}
+    <div class="text-center py-5">
+      <i class="fas fa-columns fa-3x text-muted mb-3"></i>
+      <h4 class="text-light">No applications yet</h4>
+      <p class="text-muted">When applicants apply to roles at {{ company }}, they will appear here.</p>
+      <a class="btn btn-primary" href="{% url 'jobs:post_job' %}">
+        <i class="fas fa-plus me-1"></i>Post a Job
+      </a>
+    </div>
+  {% endif %}
+</div>
+
+<!-- Application Details Modal -->
+<div class="modal fade" id="applicationModal" tabindex="-1" aria-labelledby="applicationModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content bg-dark">
+      <div class="modal-header">
+        <h5 class="modal-title text-light" id="applicationModalLabel">Application Details</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-light" id="applicationModalBody">
+        <!-- Content will be loaded via AJAX -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .kanban-board {
+    min-height: 600px;
+  }
+
+  .kanban-column {
+    min-height: 500px;
+  }
+
+  .kanban-column-body {
+    min-height: 400px;
+    max-height: 80vh;
+    overflow-y: auto;
+    transition: background-color 0.2s;
+  }
+
+  .kanban-column-body.drag-over {
+    background-color: rgba(59, 130, 246, 0.1);
+    border: 2px dashed #3b82f6;
+    border-radius: 8px;
+  }
+
+  .kanban-card {
+    cursor: move;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .kanban-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  .kanban-card.dragging {
+    opacity: 0.5;
+    transform: rotate(2deg);
+  }
+
+  @media (min-width: 1400px) {
+    .col-xl {
+      flex: 0 0 auto;
+      width: 20%;
+    }
+  }
+
+  .kanban-column-body::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .kanban-column-body::-webkit-scrollbar-track {
+    background: #1f2937;
+    border-radius: 3px;
+  }
+
+  .kanban-column-body::-webkit-scrollbar-thumb {
+    background: #4b5563;
+    border-radius: 3px;
+  }
+
+  .kanban-column-body::-webkit-scrollbar-thumb:hover {
+    background: #6b7280;
+  }
+</style>
+
+<script>
+  // Get CSRF token
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  const csrftoken = getCookie('csrftoken') || '{{ csrf_token }}';
+
+  let draggedElement = null;
+  let draggedApplicationId = null;
+  let draggedStatus = null;
+
+  function handleDragStart(event, applicationId) {
+    draggedElement = event.currentTarget;
+    draggedApplicationId = applicationId;
+    draggedStatus = event.currentTarget.dataset.currentStatus;
+    event.currentTarget.classList.add('dragging');
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/html', event.currentTarget.innerHTML);
+  }
+
+  function handleDragOver(event) {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+  }
+
+  function handleDragEnter(event) {
+    event.preventDefault();
+    const columnBody = event.currentTarget;
+    if (columnBody.classList.contains('kanban-column-body')) {
+      columnBody.classList.add('drag-over');
+    }
+  }
+
+  function handleDragLeave(event) {
+    const columnBody = event.currentTarget;
+    if (columnBody.classList.contains('kanban-column-body')) {
+      columnBody.classList.remove('drag-over');
+    }
+  }
+
+  function handleDrop(event, newStatus) {
+    event.preventDefault();
+    const columnBody = event.currentTarget;
+    columnBody.classList.remove('drag-over');
+
+    if (!draggedElement || !draggedApplicationId) {
+      return;
+    }
+
+    // Don't do anything if dropped in the same column
+    if (draggedStatus === newStatus) {
+      draggedElement.classList.remove('dragging');
+      draggedElement = null;
+      draggedApplicationId = null;
+      draggedStatus = null;
+      return;
+    }
+
+    // Update status via AJAX
+    updateApplicationStatus(draggedApplicationId, newStatus, draggedElement);
+  }
+
+  function updateApplicationStatus(applicationId, newStatus, cardElement) {
+    const formData = new FormData();
+    formData.append('status', newStatus);
+
+    // Show loading state
+    cardElement.style.opacity = '0.5';
+    cardElement.style.pointerEvents = 'none';
+
+    fetch(`/applications/${applicationId}/update-status-ajax/`, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-CSRFToken': csrftoken
+      },
+      credentials: 'same-origin'
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        // Remove card from old column
+        cardElement.remove();
+
+        // Find the new column and add the card there
+        const newColumn = document.querySelector(`.kanban-column-body[data-status="${newStatus}"]`);
+        if (newColumn) {
+          // Create a new card element with updated data
+          const newCard = cardElement.cloneNode(true);
+          newCard.classList.remove('dragging');
+          newCard.style.opacity = '1';
+          newCard.style.pointerEvents = 'auto';
+          newCard.dataset.currentStatus = newStatus;
+          
+          // Update badge if needed
+          const badge = newCard.querySelector('.badge');
+          if (badge) {
+            badge.className = `badge ${data.badge_class}`;
+          }
+
+          // Insert at the beginning of the column
+          const emptyMessage = newColumn.querySelector('.text-center');
+          if (emptyMessage) {
+            emptyMessage.remove();
+          }
+          newColumn.insertBefore(newCard, newColumn.firstChild);
+
+          // Update count in column header
+          updateColumnCount(newStatus);
+          updateColumnCount(draggedStatus);
+
+          // Show success message
+          showToast(data.message, 'success');
+        }
+
+        // Reload page after a short delay to ensure consistency
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
+      } else {
+        // Show error and restore card
+        showToast(data.error || 'Failed to update status', 'danger');
+        cardElement.style.opacity = '1';
+        cardElement.style.pointerEvents = 'auto';
+        cardElement.classList.remove('dragging');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      showToast('An error occurred while updating the status', 'danger');
+      cardElement.style.opacity = '1';
+      cardElement.style.pointerEvents = 'auto';
+      cardElement.classList.remove('dragging');
+    });
+
+    // Reset drag state
+    draggedElement = null;
+    draggedApplicationId = null;
+    draggedStatus = null;
+  }
+
+  function updateColumnCount(status) {
+    const column = document.querySelector(`.kanban-column[data-status="${status}"]`);
+    if (column) {
+      const columnBody = column.querySelector('.kanban-column-body');
+      const cards = columnBody.querySelectorAll('.kanban-card');
+      const countBadge = column.querySelector('.badge');
+      if (countBadge) {
+        countBadge.textContent = cards.length;
+      }
+    }
+  }
+
+  function viewApplicationDetails(applicationId) {
+    // For now, just show a simple message
+    // In a full implementation, you could load detailed info via AJAX
+    const modal = new bootstrap.Modal(document.getElementById('applicationModal'));
+    document.getElementById('applicationModalBody').innerHTML = `
+      <p>Loading application details...</p>
+      <p class="text-muted small">Full details view can be implemented here.</p>
+    `;
+    modal.show();
+  }
+
+  // Clean up drag state when drag ends
+  document.addEventListener('dragend', function(event) {
+    if (event.target.classList.contains('kanban-card')) {
+      event.target.classList.remove('dragging');
+    }
+  });
+
+  // Prevent default drag behavior on images and links
+  document.addEventListener('dragstart', function(event) {
+    if (event.target.tagName === 'IMG' || event.target.tagName === 'A') {
+      event.preventDefault();
+    }
+  });
+</script>
+{% endblock content %}
+

@@ -2,6 +2,9 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.db import IntegrityError
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+from django.db.models import Q
 
 from applications.forms import ApplicationForm, ApplicationStatusForm
 from applications.models import Application
@@ -139,3 +142,110 @@ def quick_apply(request):
             existing.notes = (existing.notes + '\n' if existing.notes else '') + note
             existing.save(update_fields=['notes', 'updated_at'])
     return redirect('applications:index')
+
+
+@login_required
+def kanban_board(request):
+    """Display Kanban board for recruiters to manage applications by company."""
+    # Only allow recruiters to view the Kanban board
+    try:
+        user_profile = request.user.user_profile
+        if not user_profile.is_recruiter():
+            messages.warning(request, 'Only recruiters can view the Kanban board.')
+            return redirect('jobs:index')
+        
+        company = user_profile.company
+        if not company:
+            messages.warning(request, 'Please set your company in your profile to view the Kanban board.')
+            return redirect('accounts:index')
+    except:
+        messages.warning(request, 'Please complete your profile setup first.')
+        return redirect('accounts:index')
+    
+    # Get all applications for jobs posted by recruiters from the same company
+    # OR applications where company_name matches the recruiter's company
+    from jobs.models import Job
+    
+    # Get all jobs posted by recruiters from the same company
+    # Also match jobs where the job's company field matches
+    company_jobs = Job.objects.filter(
+        Q(recruiter__user_profile__company=company) | Q(company__iexact=company)
+    )
+    
+    # Get applications that match:
+    # 1. Applications linked to jobs from this company
+    # 2. Applications where company_name matches this company (case-insensitive)
+    applications = Application.objects.filter(
+        Q(job__in=company_jobs) | Q(company_name__iexact=company)
+    ).select_related('user', 'job').order_by('-updated_at')
+    
+    # Organize applications by status
+    status_columns = {}
+    for status_code, status_label in Application.Status.choices:
+        status_columns[status_code] = {
+            'label': status_label,
+            'applications': [app for app in applications if app.status == status_code],
+            'badge_class': Application.STATUS_BADGE_CLASSES.get(status_code, 'bg-secondary text-dark')
+        }
+    
+    context = {
+        'template_data': {'title': f'Applicant Pipeline - {company} - HireBuzz'},
+        'status_columns': status_columns,
+        'company': company,
+        'total_applications': applications.count(),
+    }
+    return render(request, 'applications/kanban_board.html', context)
+
+
+@login_required
+@require_http_methods(["POST"])
+def update_application_status_ajax(request, pk):
+    """API endpoint to update application status via AJAX (for drag-and-drop)."""
+    try:
+        user_profile = request.user.user_profile
+        if not user_profile.is_recruiter():
+            return JsonResponse({'success': False, 'error': 'Only recruiters can update application status.'}, status=403)
+        
+        company = user_profile.company
+        if not company:
+            return JsonResponse({'success': False, 'error': 'Company not set in profile.'}, status=400)
+        
+        application = get_object_or_404(Application, pk=pk)
+        
+        # Verify the application belongs to the recruiter's company
+        from jobs.models import Job
+        company_jobs = Job.objects.filter(
+            Q(recruiter__user_profile__company=company) | Q(company__iexact=company)
+        )
+        
+        if application.job and application.job not in company_jobs:
+            if application.company_name.lower() != company.lower():
+                return JsonResponse({'success': False, 'error': 'You can only update applications for your company.'}, status=403)
+        
+        # Also check if company_name matches (case-insensitive)
+        if not application.job and application.company_name.lower() != company.lower():
+            return JsonResponse({'success': False, 'error': 'You can only update applications for your company.'}, status=403)
+        
+        # Get new status from request
+        new_status = request.POST.get('status')
+        if not new_status:
+            return JsonResponse({'success': False, 'error': 'Status is required.'}, status=400)
+        
+        # Validate status
+        valid_statuses = [choice[0] for choice in Application.Status.choices]
+        if new_status not in valid_statuses:
+            return JsonResponse({'success': False, 'error': 'Invalid status.'}, status=400)
+        
+        # Update status
+        application.status = new_status
+        application.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Status updated to {application.get_status_display()}',
+            'status': application.status,
+            'status_display': application.get_status_display(),
+            'badge_class': application.status_badge_class
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
