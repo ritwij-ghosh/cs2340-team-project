@@ -120,7 +120,7 @@
                         View Profile
                       </a>
                       {% if user.is_authenticated and user.user_profile.is_recruiter %}
-                        <a href="{% url 'communications:send_message' %}?recipient={{ profile.user.id }}" class="btn btn-sm btn-primary">
+                        <a href="{% url 'communications:send_message' %}?recipient={{ profile.user.id }}" class="btn btn-sm btn-primary" title="Send Message">
                           <i class="fas fa-comments"></i>
                         </a>
                       {% endif %}
